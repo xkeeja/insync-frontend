@@ -1,5 +1,6 @@
 streamlit
-pandas
+streamlit-webrtc
 requests
 google-cloud-storage
 opencv-python-headless
+pillow
