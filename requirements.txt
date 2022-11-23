@@ -2,4 +2,4 @@ streamlit
 pandas
 requests
 google-cloud-storage
-opencv-python
+opencv-python-headless
