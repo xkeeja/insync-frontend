@@ -1,3 +1,8 @@
+# extras
+*.jpg
+*.gif
+*.mp4
+.streamlit/secrets.toml
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -26,7 +31,6 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-.streamlit/secrets.toml
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
