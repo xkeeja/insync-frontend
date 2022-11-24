@@ -2,5 +2,7 @@ streamlit
 streamlit-webrtc
 requests
 google-cloud-storage
-opencv-python-headless==4.5.4.60
-pillow
+pandas
+numpy
+matplotlib
+seaborn
