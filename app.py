@@ -58,7 +58,7 @@ def main():
             else:
                 st.error("Dataframe request timeout")
             #Retrieve video
-            if not get_file(source_blob='video.gif', save_as='video.gif'):
+            if not get_file(source_blob='video.mp4', save_as='video.mp4'):
                 st.error("Video request timeout")
         st.balloons()
 
@@ -66,7 +66,7 @@ def main():
         st.line_chart(df)
 
         #Display video
-        video_file = open('video.gif', 'rb')
+        video_file = open('video.mp4', 'rb')
         video_bytes = video_file.read()
         st.video(video_bytes)
 
