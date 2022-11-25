@@ -5,6 +5,8 @@ import matplotlib as plt
 import seaborn as sns
 import numpy as np
 import time
+from htbuilder import div, big, h2, styles
+from htbuilder.units import rem
 from streamlit_lottie import st_lottie
 from streamlit_lottie import st_lottie_spinner
 from google.cloud import storage
@@ -42,6 +44,24 @@ def load_lottieurl(url: str):
         return None
     return r.json()
 
+#pretty stats
+def display_dial(title, value, color):
+        st.markdown(
+            div(
+                style=styles(
+                    text_align="center",
+                    color=color,
+                    padding=(rem(0.8), 0, rem(3), 0),
+                )
+            )(
+                h2(style=styles(font_size=rem(0.8), font_weight=600, padding=0))(title),
+                big(style=styles(font_size=rem(3), font_weight=800, line_height=1))(
+                    value
+                ),
+            ),
+            unsafe_allow_html=True,
+        )
+
 def main():
 
     st.set_page_config(layout="wide", page_title="Dance Synchronisation")
@@ -66,25 +86,36 @@ def main():
     #If video has been uploaded
     if uploaded_video is not None:
 
-        with st.spinner('Contacting api...'):
-            url = "https://syncv3-eagwezifvq-an.a.run.app/vid_process_from_st"
+        with st.spinner('Loading video data...'):
+            url = "https://syncv3-eagwezifvq-an.a.run.app/vid_stats"
             files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
-            response = requests.post(url, files=files).json()
-        st.write(response)
+            stats = requests.post(url, files=files).json()
+
+        a, b, c = st.columns(3)
+        with a:
+            display_dial("FPS", f"{stats['fps']}", "#1C83E1")
+        with b:
+            display_dial("FRAMES", f"{stats['frame_count']}", "#1C83E1")
+        with c:
+            display_dial("DIMENSION", f"{stats['dim']}", "#1C83E1")
+
 
         with st.spinner('Analysing dance moves...'):
             #Retreive database
-            if get_file(source_blob='data.csv', save_as='data.csv'):
-                df = pd.read_csv('data.csv')
-            else:
-                st.error("Dataframe request timeout")
+            # if get_file(source_blob='data.csv', save_as='data.csv'):
+            #     df = pd.read_csv('data.csv')
+            # else:
+            #     st.error("Dataframe request timeout")
+            url = "https://syncv3-eagwezifvq-an.a.run.app/vid_processed"
+            data = requests.get(url)
+            df = pd.json_normalize(data, record_path =['data'])
             #Retrieve video
             if not get_file(source_blob='video.mp4', save_as='video.mp4'):
                 st.error("Video request timeout")
 
         #Plot results
         df['Sync'] = df['Sync'] - 0.5
-        st.area_chart(data=df, x='Time', y='Sync', )
+        st.line_chart(data=df, x='Time', y='Sync', )
 
         #Timestamp buttons
         sorted_df = df.sort_values(by=['Sync']).round(2).head(5)
@@ -114,6 +145,15 @@ def main():
             if time_chosen:
                 placeholder.empty()
                 placeholder.video(video_bytes, start_time=time_chosen[0])
+
+        st.write("**Full video:**")
+        st.video(video_bytes)
+
+        st.write("**Model info:**")
+        df = pd.DataFrame(
+            np.random.randn(50, 20),
+            columns=('col %d' % i for i in range(20)))
+        st.dataframe(df)
 
 if __name__ == '__main__':
 	main()
