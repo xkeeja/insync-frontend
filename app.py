@@ -12,6 +12,12 @@ from streamlit_lottie import st_lottie_spinner
 from google.cloud import storage
 from google.oauth2 import service_account
 
+st.set_page_config(layout="wide", page_title="Dance Synchronisation")
+
+#load css
+with open('style.css') as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
 # Set up google cloud
 credentials = service_account.Credentials.from_service_account_info(
     st.secrets["gcp_service_account"]
@@ -44,6 +50,14 @@ def load_lottieurl(url: str):
         return None
     return r.json()
 
+#load animations
+lottie_url_dancing = "https://assets7.lottiefiles.com/packages/lf20_owg7kezi.json"
+lottie_dancing = load_lottieurl(lottie_url_dancing)
+lottie_url_api_loading = "https://assets2.lottiefiles.com/packages/lf20_rsgxuwx0.json"
+lottie_api_loading = load_lottieurl(lottie_url_api_loading)
+lottie_url_model_loading = "https://assets1.lottiefiles.com/packages/lf20_c9uz3mrt.json"
+lottie_model_loading = load_lottieurl(lottie_url_model_loading)
+
 #pretty stats
 def display_dial(title, value, color):
         st.markdown(
@@ -54,21 +68,71 @@ def display_dial(title, value, color):
                     padding=(rem(0.8), 0, rem(3), 0),
                 )
             )(
-                h2(style=styles(font_size=rem(0.8), font_weight=600, padding=0))(title),
-                big(style=styles(font_size=rem(3), font_weight=800, line_height=1))(
+                h2(style=styles(font_size=rem(0.8), font_weight=400, padding=0))(title),
+                big(style=styles(font_size=rem(2), font_weight=400, line_height=1))(
                     value
                 ),
             ),
             unsafe_allow_html=True,
         )
 
+def processing():
+    with st_lottie_spinner(lottie_model_loading, key='xd'):
+        #Retreive database
+        if get_file(source_blob='data.csv', save_as='data.csv'):
+            df = pd.read_csv('data.csv')
+        else:
+            st.error("Dataframe request timeout")
+        # try:
+        #     url = "https://syncv3-eagwezifvq-an.a.run.app/vid_processed"
+        #     data = requests.get(url)
+        #     df = pd.json_normalize(data, record_path =['data'])
+        # except:
+        #     st.error("Database retrieval failed")
+        #Retrieve video
+        if not get_file(source_blob='video.mp4', save_as='video.mp4'):
+            st.error("Video request timeout")
+
+    #Plot results
+    df['Sync'] = df['Sync'] - 0.5
+    st.line_chart(data=df, x='Time', y='Sync')
+
+    #Load processed video
+    video_file = open('video.mp4', 'rb')
+    video_bytes = video_file.read()
+    st.video(video_bytes)
+
+    #Timestamp buttons
+    sorted_df = df.sort_values(by=['Sync']).round(2).head(5)
+    timestamps = sorted_df['Time'].to_list()
+    sync = sorted_df['Sync'].to_list()
+
+    with st.expander("**Your top five miss-steps:**"):
+        # bool, moment, description
+        button_col, video_col = st.columns(2)
+        with button_col:
+            buttons = [
+                (st.button("A", "a"), timestamps[0], st.write(f'Time: {timestamps[0]}s, Sync: {sync[0]}')),
+                (st.button("B", "b"), timestamps[1], st.write(f'Time: {timestamps[1]}s, Sync: {sync[1]}')),
+                (st.button("C", "c"), timestamps[2], st.write(f'Time: {timestamps[2]}s, Sync: {sync[2]}')),
+                (st.button("D", "d"), timestamps[3], st.write(f'Time: {timestamps[3]}s, Sync: {sync[3]}')),
+                (st.button("E", "e"), timestamps[4], st.write(f'Time: {timestamps[4]}s, Sync: {sync[4]}'))
+            ]
+        #empty placeholder to reload widget when different button is pressed
+        with video_col:
+            placeholder = st.empty()
+            time_chosen = [v for k, v, t in buttons if k == True]  # return time associated with a clicked button
+            if time_chosen:
+                placeholder.empty()
+                placeholder.video(video_bytes, start_time=time_chosen[0])
+
+    st.write("**Model info:**")
+    df = pd.DataFrame(
+        np.random.randn(50, 20),
+        columns=('col %d' % i for i in range(20)))
+    st.dataframe(df)
+
 def main():
-
-    st.set_page_config(layout="wide", page_title="Dance Synchronisation")
-
-    #load animations
-    lottie_url_dancing = "https://assets7.lottiefiles.com/packages/lf20_owg7kezi.json"
-    lottie_dancing = load_lottieurl(lottie_url_dancing)
 
     #build header
     col1, col2, col3 = st.columns([1,2,1])
@@ -81,79 +145,35 @@ def main():
 
 
     #Receive video file from user upload
-    uploaded_video = st.file_uploader("**Upload video for evaluation**", ['mp4', 'gif'], key='dance')
-    # frame_count = 0
+    uploaded_video = st.file_uploader("**Upload video for evaluation**", ['mp4'], key='dance')
     #If video has been uploaded
     if uploaded_video is not None:
 
-        with st.spinner('Loading video data...'):
-            url = "https://syncv3-eagwezifvq-an.a.run.app/vid_stats"
+        with st_lottie_spinner(lottie_model_loading):
+            # url = "https://syncv3-eagwezifvq-an.a.run.app/vid_stats"
+            url = "https://syncv3-eagwezifvq-an.a.run.app/vid_process_from_st"
             files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
             stats = requests.post(url, files=files).json()
 
-        a, b, c = st.columns(3)
+        a, b, c = st.columns([1,4,1])
+        with b:
+            show_vid = st.video(uploaded_video)
+
+        process_vid = False
+        a, b, c, d, e = st.columns(5)
         with a:
             display_dial("FPS", f"{stats['fps']}", "#1C83E1")
         with b:
             display_dial("FRAMES", f"{stats['frame_count']}", "#1C83E1")
         with c:
             display_dial("DIMENSION", f"{stats['dim']}", "#1C83E1")
+        with e:
+            if st.button("Start"):
+                show_vid.empty()
+                process_vid = True
 
-
-        with st.spinner('Analysing dance moves...'):
-            #Retreive database
-            # if get_file(source_blob='data.csv', save_as='data.csv'):
-            #     df = pd.read_csv('data.csv')
-            # else:
-            #     st.error("Dataframe request timeout")
-            url = "https://syncv3-eagwezifvq-an.a.run.app/vid_processed"
-            data = requests.get(url)
-            df = pd.json_normalize(data, record_path =['data'])
-            #Retrieve video
-            if not get_file(source_blob='video.mp4', save_as='video.mp4'):
-                st.error("Video request timeout")
-
-        #Plot results
-        df['Sync'] = df['Sync'] - 0.5
-        st.line_chart(data=df, x='Time', y='Sync', )
-
-        #Timestamp buttons
-        sorted_df = df.sort_values(by=['Sync']).round(2).head(5)
-        timestamps = sorted_df['Time'].to_list()
-        sync = sorted_df['Sync'].to_list()
-        # button1, button2, button3, button4, button5 = st.columns(5)
-        # with button1:
-        #     if st.button('1'):
-        st.write("**Your top five miss-steps:**")
-        # bool, moment, description
-        button_col, video_col = st.columns(2)
-        with button_col:
-            buttons = [
-                (st.button("A", "a"), timestamps[0], st.write(f'Time: {timestamps[0]}s, Sync: {sync[0]}')),
-                (st.button("B", "b"), timestamps[1], st.write(f'Time: {timestamps[1]}s, Sync: {sync[1]}')),
-                (st.button("C", "c"), timestamps[2], st.write(f'Time: {timestamps[2]}s, Sync: {sync[2]}')),
-                (st.button("D", "d"), timestamps[3], st.write(f'Time: {timestamps[3]}s, Sync: {sync[3]}')),
-                (st.button("E", "e"), timestamps[4], st.write(f'Time: {timestamps[4]}s, Sync: {sync[4]}'))
-            ]
-        #load video data
-        video_file = open('video.mp4', 'rb')
-        video_bytes = video_file.read()
-        #empty placeholder to reload widget when different button is pressed
-        with video_col:
-            placeholder = st.empty()
-            time_chosen = [v for k, v, t in buttons if k == True]  # return time associated with a clicked button
-            if time_chosen:
-                placeholder.empty()
-                placeholder.video(video_bytes, start_time=time_chosen[0])
-
-        st.write("**Full video:**")
-        st.video(video_bytes)
-
-        st.write("**Model info:**")
-        df = pd.DataFrame(
-            np.random.randn(50, 20),
-            columns=('col %d' % i for i in range(20)))
-        st.dataframe(df)
+        if process_vid:
+            processing()
 
 if __name__ == '__main__':
 	main()
