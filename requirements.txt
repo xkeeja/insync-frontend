@@ -7,3 +7,4 @@ numpy
 matplotlib
 seaborn
 time
+streamlit_lottie
