@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib as plt
 import seaborn as sns
 import numpy as np
-import time
+# import time
 from htbuilder import div, big, h2, styles
 from htbuilder.units import rem
 from streamlit_lottie import st_lottie
@@ -78,100 +78,101 @@ def display_dial(title, value, color):
         )
 
 def processing(stats):
-    if isinstance(stats, dict):
-        with st_lottie_spinner(lottie_model_loading, key='xd'):
-            url = "http://127.0.0.1:8000/vid_process"
-            # url = "https://syncv4-eagwezifvq-an.a.run.app/vid_process"
-            params = {
-                "vid_name": stats['vid_name'],
-                "output_name": stats['output_name'],
-                "frame_count": stats['frame_count'],
-                "fps": stats['fps']
-                }
-            response = requests.get(url, params=params).json()
-            
-            # #Retreive database
-            # if get_file(source_blob='data.csv', save_as='data.csv'):
-            #     df = pd.read_csv('data.csv')
-            # else:
-            #     st.error("Dataframe request timeout")
-            # # try:
-            # #     url = "https://syncv3-eagwezifvq-an.a.run.app/vid_processed"
-            # #     data = requests.get(url)
-            # #     df = pd.json_normalize(data, record_path =['data'])
-            # # except:
-            # #     st.error("Database retrieval failed")
-            # #Retrieve video
-            # if not get_file(source_blob='video.mp4', save_as='video.mp4'):
-            #     st.error("Video request timeout")
-
-        #Create df
-        d = {
-            'Time': response['timestamps'],
-            'Sync': response['scores']
-        }
-        df = pd.DataFrame(d)
+    with st_lottie_spinner(lottie_model_loading, key='xd'):
+        url = "http://127.0.0.1:8000/vid_process"
+        # url = "https://syncv4-eagwezifvq-an.a.run.app/vid_process"
+        params = {
+            "vid_name": stats['vid_name'],
+            "output_name": stats['output_name'],
+            "frame_count": stats['frame_count'],
+            "fps": stats['fps']
+            }
+        response = requests.get(url, params=params).json()
         
-        #Plot results
-        df['Sync'] = df['Sync'] - 0.5
-        st.line_chart(data=df, x='Time', y='Sync')
+        # #Retreive database
+        # if get_file(source_blob='data.csv', save_as='data.csv'):
+        #     df = pd.read_csv('data.csv')
+        # else:
+        #     st.error("Dataframe request timeout")
+        # # try:
+        # #     url = "https://syncv3-eagwezifvq-an.a.run.app/vid_processed"
+        # #     data = requests.get(url)
+        # #     df = pd.json_normalize(data, record_path =['data'])
+        # # except:
+        # #     st.error("Database retrieval failed")
+        # #Retrieve video
+        # if not get_file(source_blob='video.mp4', save_as='video.mp4'):
+        #     st.error("Video request timeout")
 
-        #Load processed video
-        video_url = response['output_url']
-        st.video(video_url)
-        # video_file = open('video.mp4', 'rb')
-        # video_bytes = video_file.read()
-        # st.video(video_bytes)
+    #Create df
+    d = {
+        'Time': response['timestamps'],
+        'Sync': response['scores']
+    }
+    df = pd.DataFrame(d)
+    
+    #Plot results
+    df['Sync'] = df['Sync'] - 0.5
+    st.line_chart(data=df, x='Time', y='Sync')
 
-        #Timestamp buttons
-        sorted_df = df.sort_values(by=['Sync']).round(2).head(5)
-        timestamps = sorted_df['Time'].to_list()
-        sync = sorted_df['Sync'].to_list()
+    #Load processed video
+    video_url = response['output_url']
+    st.video(video_url)
+    # video_file = open('video.mp4', 'rb')
+    # video_bytes = video_file.read()
+    # st.video(video_bytes)
 
-        with st.expander("**Your top five areas for improvement:**"):
-            # bool, moment, description
-            button_col, video_col = st.columns(2)
-            with button_col:
-                buttons = [
-                    (st.button("A", "a"), timestamps[0], st.write(f'Time: {timestamps[0]}s, Sync: {sync[0]}')),
-                    (st.button("B", "b"), timestamps[1], st.write(f'Time: {timestamps[1]}s, Sync: {sync[1]}')),
-                    (st.button("C", "c"), timestamps[2], st.write(f'Time: {timestamps[2]}s, Sync: {sync[2]}')),
-                    (st.button("D", "d"), timestamps[3], st.write(f'Time: {timestamps[3]}s, Sync: {sync[3]}')),
-                    (st.button("E", "e"), timestamps[4], st.write(f'Time: {timestamps[4]}s, Sync: {sync[4]}'))
-                ]
-            #empty placeholder to reload widget when different button is pressed
-            with video_col:
-                placeholder = st.empty()
-                time_chosen = [v for k, v, t in buttons if k == True]  # return time associated with a clicked button
-                if time_chosen:
-                    placeholder.empty()
-                    placeholder.video(video_url, start_time=time_chosen[0])
+    #Timestamp buttons
+    sorted_df = df.sort_values(by=['Sync']).round(2).head(5)
+    timestamps = sorted_df['Time'].to_list()
+    sync = sorted_df['Sync'].to_list()
+
+    with st.expander("**Your top five areas for improvement:**"):
+        # ## button method for displaying top 5 improvement areas
+        # # bool, moment, description
+        # button_col, video_col = st.columns(2)
+        # with button_col:
+        #     buttons = [
+        #         (st.button("A", "a"), timestamps[0], st.write(f'Time: {timestamps[0]}s, Sync: {sync[0]}')),
+        #         (st.button("B", "b"), timestamps[1], st.write(f'Time: {timestamps[1]}s, Sync: {sync[1]}')),
+        #         (st.button("C", "c"), timestamps[2], st.write(f'Time: {timestamps[2]}s, Sync: {sync[2]}')),
+        #         (st.button("D", "d"), timestamps[3], st.write(f'Time: {timestamps[3]}s, Sync: {sync[3]}')),
+        #         (st.button("E", "e"), timestamps[4], st.write(f'Time: {timestamps[4]}s, Sync: {sync[4]}'))
+        #     ]
+        # #empty placeholder to reload widget when different button is pressed
+        # with video_col:
+        #     placeholder = st.empty()
+        #     time_chosen = [v for k, v, t in buttons if k == True]  # return time associated with a clicked button
+        #     if time_chosen:
+        #         placeholder.empty()
+        #         placeholder.video(video_url, start_time=math.floor(time_chosen[0]))
+        
+        # radio method for displaying top 5 improvement areas
+        choice1 = f'Time: {timestamps[0]}s, Sync: {sync[0]}'
+        choice2 = f'Time: {timestamps[1]}s, Sync: {sync[1]}'
+        choice3 = f'Time: {timestamps[2]}s, Sync: {sync[2]}'
+        choice4 = f'Time: {timestamps[3]}s, Sync: {sync[3]}'
+        choice5 = f'Time: {timestamps[4]}s, Sync: {sync[4]}'
+        
+        radio = st.radio('**Select a timestamp**', (choice1, choice2, choice3, choice4, choice5,))
+        
+        if radio == choice1:
+            st.video(video_url, start_time=math.floor(timestamps[0]))
+        elif radio == choice2:
+            st.video(video_url, start_time=math.floor(timestamps[1]))
+        elif radio == choice2:
+            st.video(video_url, start_time=math.floor(timestamps[2]))
+        elif radio == choice2:
+            st.video(video_url, start_time=math.floor(timestamps[3]))
+        else:
+            st.video(video_url, start_time=math.floor(timestamps[4]))
+        
             
-            # choice1 = f'Time: {timestamps[0]}s, Sync: {sync[0]}'
-            # choice2 = f'Time: {timestamps[1]}s, Sync: {sync[1]}'
-            # choice3 = f'Time: {timestamps[2]}s, Sync: {sync[2]}'
-            # choice4 = f'Time: {timestamps[3]}s, Sync: {sync[3]}'
-            # choice5 = f'Time: {timestamps[4]}s, Sync: {sync[4]}'
-            
-            # radio = st.radio('**Select a timestamp**', (choice1, choice2, choice3, choice4, choice5,))
-            
-            # if radio == choice1:
-            #     st.video(video_url, start_time=math.floor(timestamps[0]))
-            # elif radio == choice2:
-            #     st.video(video_url, start_time=math.floor(timestamps[1]))
-            # elif radio == choice2:
-            #     st.video(video_url, start_time=math.floor(timestamps[2]))
-            # elif radio == choice2:
-            #     st.video(video_url, start_time=math.floor(timestamps[3]))
-            # else:
-            #     st.video(video_url, start_time=math.floor(timestamps[4]))
-            
-                
-        with st.expander("**Model info:**"):
-        # df = pd.DataFrame(
-        #     np.random.randn(50, 20),
-        #     columns=('col %d' % i for i in range(20)))
-            st.dataframe(df)
+    with st.expander("**Model info:**"):
+    # df = pd.DataFrame(
+    #     np.random.randn(50, 20),
+    #     columns=('col %d' % i for i in range(20)))
+        st.dataframe(df)
 
 def main():
 
@@ -200,7 +201,7 @@ def main():
         with b:
             show_vid = st.video(uploaded_video)
 
-        # process_vid = False
+        process_vid = False
         a, b, c, _, d = st.columns(5)
         with a:
             display_dial("FPS", f"{stats['fps']}", "#1C83E1")
