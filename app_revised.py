@@ -79,8 +79,8 @@ def display_dial(title, value, color):
 
 def processing(stats):
     with st_lottie_spinner(lottie_model_loading, key='xd'):
-        url = "http://127.0.0.1:8000/vid_process"
-        # url = "https://syncv4-eagwezifvq-an.a.run.app/vid_process"
+        # url = "http://127.0.0.1:8000/vid_process"
+        url = "https://syncv5-eagwezifvq-an.a.run.app/vid_process"
         params = {
             "vid_name": stats['vid_name'],
             "output_name": stats['output_name'],
@@ -192,8 +192,8 @@ def main():
     if uploaded_video is not None:
 
         with st_lottie_spinner(lottie_model_loading):
-            # url = "https://syncv3-eagwezifvq-an.a.run.app/vid_stats"
-            url = "http://127.0.0.1:8000/vid_stats"
+            url = "https://syncv5-eagwezifvq-an.a.run.app/vid_stats"
+            # url = "http://127.0.0.1:8000/vid_stats"
             files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
             stats = requests.post(url, files=files).json()
 
