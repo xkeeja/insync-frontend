@@ -8,3 +8,4 @@ matplotlib
 seaborn
 streamlit_lottie
 htbuilder
+bokeh==2.4.3

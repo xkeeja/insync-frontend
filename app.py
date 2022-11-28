@@ -1,47 +1,19 @@
 import streamlit as st
 import requests
+import math
 import pandas as pd
-import matplotlib as plt
-import seaborn as sns
-import numpy as np
+from bokeh.plotting import figure
 import time
 from htbuilder import div, big, h2, styles
 from htbuilder.units import rem
 from streamlit_lottie import st_lottie
 from streamlit_lottie import st_lottie_spinner
-from google.cloud import storage
-from google.oauth2 import service_account
 
 st.set_page_config(layout="wide", page_title="Dance Synchronisation")
 
 #load css
 with open('style.css') as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-
-# Set up google cloud
-credentials = service_account.Credentials.from_service_account_info(
-    st.secrets["gcp_service_account"]
-)
-client = storage.Client(credentials=credentials)
-bucket = client.bucket("dance-sync-user-upload")
-
-# Retreive from backend
-def get_file(source_blob, save_as, source_bucket=bucket):
-    # bucket = client.bucket(source_bucket)
-    blob = bucket.blob(source_blob)
-    result = False
-    #Keep trying to fetch blob until it exists
-    start = time.time()
-    while result is False:
-        try:
-            blob.download_to_filename(save_as)
-            result = True
-        except:
-            time.sleep(1)
-            if time.time() - start > 10:
-                break
-            pass
-    return result
 
 #animations
 def load_lottieurl(url: str):
@@ -76,61 +48,57 @@ def display_dial(title, value, color):
             unsafe_allow_html=True,
         )
 
-def processing():
-    with st_lottie_spinner(lottie_model_loading, key='xd'):
-        #Retreive database
-        if get_file(source_blob='data.csv', save_as='data.csv'):
-            df = pd.read_csv('data.csv')
-        else:
-            st.error("Dataframe request timeout")
-        # try:
-        #     url = "https://syncv3-eagwezifvq-an.a.run.app/vid_processed"
-        #     data = requests.get(url)
-        #     df = pd.json_normalize(data, record_path =['data'])
-        # except:
-        #     st.error("Database retrieval failed")
-        #Retrieve video
-        if not get_file(source_blob='video.mp4', save_as='video.mp4'):
-            st.error("Video request timeout")
+def processing(d):
+    if isinstance(d, dict):
+        with st_lottie_spinner(lottie_model_loading, key='xd'):
+            # url = "http://127.0.0.1:8000/vid_process"
+            url = "https://syncv5-eagwezifvq-an.a.run.app/vid_process"
+            params = {k:d[k] for k in d if k!='dim'}
+            response = requests.get(url, params=params).json()
 
-    #Plot results
-    df['Sync'] = df['Sync'] - 0.5
-    st.line_chart(data=df, x='Time', y='Sync')
+        #Create df
+        st.write(response)
+        d = {
+            'Time': response['timestamps'],
+            'Error': response['scores']
+        }
+        df = pd.DataFrame(d)
 
-    #Load processed video
-    video_file = open('video.mp4', 'rb')
-    video_bytes = video_file.read()
-    st.video(video_bytes)
+        #Plot results
+        p = figure(
+            title='Synchronisation Analysis',
+            x_axis_label='Timestamp',
+            y_axis_label='Error Score')
+        p.vbar(x=d['Time'], top=d['Error'])
+        st.bokeh_chart(p, use_container_width=True)
 
-    #Timestamp buttons
-    sorted_df = df.sort_values(by=['Sync']).round(2).head(5)
-    timestamps = sorted_df['Time'].to_list()
-    sync = sorted_df['Sync'].to_list()
+        #Load processed video
+        placeholder = st.empty()
+        video_url = response['output_url']
+        placeholder.video(video_url)
 
-    with st.expander("**Your top five miss-steps:**"):
-        # bool, moment, description
-        button_col, video_col = st.columns(2)
-        with button_col:
+        #Timestamp buttons
+        sorted_df = df.sort_values(by=['Error']).round(2).head(5)
+        timestamps = sorted_df['Time'].to_list()
+        sync = sorted_df['Error'].to_list()
+
+        with st.sidebar:
             buttons = [
-                (st.button("A", "a"), timestamps[0], st.write(f'Time: {timestamps[0]}s, Sync: {sync[0]}')),
-                (st.button("B", "b"), timestamps[1], st.write(f'Time: {timestamps[1]}s, Sync: {sync[1]}')),
-                (st.button("C", "c"), timestamps[2], st.write(f'Time: {timestamps[2]}s, Sync: {sync[2]}')),
-                (st.button("D", "d"), timestamps[3], st.write(f'Time: {timestamps[3]}s, Sync: {sync[3]}')),
-                (st.button("E", "e"), timestamps[4], st.write(f'Time: {timestamps[4]}s, Sync: {sync[4]}'))
+                (st.button("A", "a"), timestamps[0], st.write(f'Time: {timestamps[0]}s, Error: {sync[0]}')),
+                (st.button("B", "b"), timestamps[1], st.write(f'Time: {timestamps[1]}s, Error: {sync[1]}')),
+                (st.button("C", "c"), timestamps[2], st.write(f'Time: {timestamps[2]}s, Error: {sync[2]}')),
+                (st.button("D", "d"), timestamps[3], st.write(f'Time: {timestamps[3]}s, Error: {sync[3]}')),
+                (st.button("E", "e"), timestamps[4], st.write(f'Time: {timestamps[4]}s, Error: {sync[4]}'))
             ]
         #empty placeholder to reload widget when different button is pressed
-        with video_col:
-            placeholder = st.empty()
-            time_chosen = [v for k, v, t in buttons if k == True]  # return time associated with a clicked button
-            if time_chosen:
-                placeholder.empty()
-                placeholder.video(video_bytes, start_time=time_chosen[0])
+        time_chosen = [v for k, v, _ in buttons if k == True]  # return time associated with a clicked button
+        if time_chosen:
+            placeholder.empty()
+            placeholder.video(video_url, start_time=time_chosen[0])
 
-    st.write("**Model info:**")
-    df = pd.DataFrame(
-        np.random.randn(50, 20),
-        columns=('col %d' % i for i in range(20)))
-    st.dataframe(df)
+
+        with st.expander("**Model info:**"):
+            st.dataframe(df)
 
 def main():
 
@@ -150,30 +118,30 @@ def main():
     if uploaded_video is not None:
 
         with st_lottie_spinner(lottie_model_loading):
-            # url = "https://syncv3-eagwezifvq-an.a.run.app/vid_stats"
-            url = "https://syncv3-eagwezifvq-an.a.run.app/vid_process_from_st"
+            url = "https://syncv5-eagwezifvq-an.a.run.app/vid_stats"
+            # url = "http://127.0.0.1:8000/vid_stats"
             files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
             stats = requests.post(url, files=files).json()
 
-        a, b, c = st.columns([1,4,1])
+        _, b, _ = st.columns([1,4,1])
         with b:
             show_vid = st.video(uploaded_video)
 
         process_vid = False
-        a, b, c, d, e = st.columns(5)
+        a, b, c, _, d = st.columns([2,2,2,1,2])
         with a:
             display_dial("FPS", f"{stats['fps']}", "#1C83E1")
         with b:
             display_dial("FRAMES", f"{stats['frame_count']}", "#1C83E1")
         with c:
             display_dial("DIMENSION", f"{stats['dim']}", "#1C83E1")
-        with e:
+        with d:
             if st.button("Start"):
                 show_vid.empty()
                 process_vid = True
 
         if process_vid:
-            processing()
+            processing(stats)
 
 if __name__ == '__main__':
-	main()
+    main()
