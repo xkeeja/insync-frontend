@@ -70,6 +70,8 @@ def processing(d):
         graph.layout.hovermode = 'closest'
         graph.on_click(update_point)
         
+        st.plotly_chart(graph, use_container_width=True)
+        
         #graph on-click
         def update_point(trace, points, selector):
             # index = df.index[df['Time']==].tolist()
