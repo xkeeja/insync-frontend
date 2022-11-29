@@ -83,8 +83,7 @@ def processing(d):
         fig = go.FigureWidget(fig.data, fig.layout)
         fig.data[0].on_click(go_to_frame)
         
-        # st.plotly_chart(fig, use_container_width=True)
-        st.write(fig)
+        st.plotly_chart(fig, use_container_width=True)
         
         # fig = px.line(df, x="Time", y="Error")
         # st.plotly_chart(fig, use_container_width=True)
