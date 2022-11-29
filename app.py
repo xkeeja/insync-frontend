@@ -64,18 +64,24 @@ def processing(d):
             'Error': response['scores']
         }
         df = pd.DataFrame(d)
+        df['idx'] = df.index
 
-        fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
-        graph = fig.data[0]
-        graph.layout.hovermode = 'closest'
-        graph.on_click(update_point)
+        # fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
+        fig = px.line(df, x='Time', y='Error', title='Synchronisation Analysis'
+                        hover_name='idx')
+        fig = go.FigureWidget(fig.data, fig.layout)
+        fig.data[0].on_click(go_to_frame)
         
-        st.plotly_chart(graph, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
+        image_placeholder = st.empty()
         
         #graph on-click
-        def update_point(trace, points, selector):
+        def go_to_frame(trace, points, selector):
+            image_placeholder.empty()
             # index = df.index[df['Time']==].tolist()
             st.write(trace, points, selector)
+            #image_placeholder.image(f'https://storage.googleapis.com/sync_testinput/screencaps/frame{}.jpg')
+            
         
         # fig = px.line(df, x="Time", y="Error")
         # st.plotly_chart(fig, use_container_width=True)
