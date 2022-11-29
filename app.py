@@ -67,7 +67,7 @@ def processing(d):
         df['idx'] = df.index
 
         # fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
-        fig = px.line(df, x='Time', y='Error', title='Synchronisation Analysis'
+        fig = px.line(df, x='Time', y='Error', title='Synchronisation Analysis',
                         hover_name='idx')
         fig = go.FigureWidget(fig.data, fig.layout)
         fig.data[0].on_click(go_to_frame)
