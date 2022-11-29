@@ -65,6 +65,13 @@ def processing(d):
         }
         df = pd.DataFrame(d)
         df['idx'] = df.index
+        
+        #graph on-click
+        def go_to_frame(trace, points, selector):
+            image_placeholder.empty()
+            # index = df.index[df['Time']==].tolist()
+            st.write(trace, points, selector)
+            #image_placeholder.image(f'https://storage.googleapis.com/sync_testinput/screencaps/frame{}.jpg')
 
         # fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
         fig = px.line(df, x='Time', y='Error', title='Synchronisation Analysis',
@@ -74,14 +81,6 @@ def processing(d):
         
         st.plotly_chart(fig, use_container_width=True)
         image_placeholder = st.empty()
-        
-        #graph on-click
-        def go_to_frame(trace, points, selector):
-            image_placeholder.empty()
-            # index = df.index[df['Time']==].tolist()
-            st.write(trace, points, selector)
-            #image_placeholder.image(f'https://storage.googleapis.com/sync_testinput/screencaps/frame{}.jpg')
-            
         
         # fig = px.line(df, x="Time", y="Error")
         # st.plotly_chart(fig, use_container_width=True)
