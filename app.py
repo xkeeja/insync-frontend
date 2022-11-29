@@ -68,19 +68,20 @@ def processing(d):
         
         #graph on-click
         def go_to_frame(trace, points, selector):
-            image_placeholder.empty()
             # index = df.index[df['Time']==].tolist()
-            st.write(trace, points, selector)
+            st.write("test: ", trace, points, selector)
             #image_placeholder.image(f'https://storage.googleapis.com/sync_testinput/screencaps/frame{}.jpg')
 
         # fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
+        # image_placeholder = st.empty()
         fig = px.line(df, x='Time', y='Error', title='Synchronisation Analysis',
-                        hover_name='idx')
+                        color='yellow', hover_name='idx')
+        fig.update_xaxes(showgrid=False)
+        fig.update_yaxes(showgrid=False)
         fig = go.FigureWidget(fig.data, fig.layout)
         fig.data[0].on_click(go_to_frame)
         
         st.plotly_chart(fig, use_container_width=True)
-        image_placeholder = st.empty()
         
         # fig = px.line(df, x="Time", y="Error")
         # st.plotly_chart(fig, use_container_width=True)
