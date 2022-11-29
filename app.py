@@ -96,7 +96,7 @@ def processing(d):
         with st.expander("**Score Card:**"):
             #overall score sensitive to outliers
             scaler = MinMaxScaler()
-            d['scaled'] = scaler.fit_transform(d['Error'].to_numpy().reshape(-1,1))
+            d['scaled'] = scaler.fit_transform(np.array(d['Error']).reshape(-1,1))
             st.write("Overall: ", d['scaled'].mean())
             #split dataframe into equal parts
             split = np.array_split(d, 4)
