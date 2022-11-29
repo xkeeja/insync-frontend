@@ -9,3 +9,4 @@ seaborn
 streamlit_lottie
 htbuilder
 ipywidgets>=8.0.0
+plotly
