@@ -85,9 +85,6 @@ def processing(d):
         fig.data[0].on_click(go_to_frame)
         
         st.plotly_chart(fig, use_container_width=True)
-        
-        # fig = px.line(df, x="Time", y="Error")
-        # st.plotly_chart(fig, use_container_width=True)
 
         #Load processed video
         placeholder = st.empty()
@@ -96,17 +93,25 @@ def processing(d):
 
         with st.expander("**Score Card:**"):
             #overall score sensitive to outliers
-            scaler = MinMaxScaler()
-            d['scaled'] = scaler.fit_transform(np.array(d['Error']).reshape(-1,1))
-            st.write("Overall: ", d['scaled'].mean())
+            # scaler = MinMaxScaler()
+            # d['scaled'] = scaler.fit_transform(np.array(d['Error']).reshape(-1,1))
+            # st.write("Overall: ", d['scaled'].mean())
             #split dataframe into equal parts
             split = np.array_split(d, 4)
             st.write("Score for each quartile:")
             for i, df in enumerate(split):
-                st.write(i, ": ", df['scaled'].mean())
+                st.write(i, ": ", df['Error'].mean())
 
         with st.expander("**Model info:**"):
-            st.dataframe(df)
+            # st.dataframe(df)
+            fig = go.Figure(data=[go.Table(
+                header=dict(values=list(d.columns),
+                            fill_color='paleturquoise',
+                            align='left'),
+                cells=dict(values=[d.idx, df.Time, df.Error],
+                           fill_color='lavender',
+                           align='left'))
+            ])
             
 
 def main():
