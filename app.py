@@ -2,7 +2,8 @@ import streamlit as st
 import requests
 import math
 import pandas as pd
-from bokeh.plotting import figure
+import plotly.graph_objects as go
+import plotly.express as px
 import time
 from htbuilder import div, big, h2, styles
 from htbuilder.units import rem
@@ -52,7 +53,7 @@ def processing(d):
     if isinstance(d, dict):
         with st_lottie_spinner(lottie_model_loading, key='xd'):
             # url = "http://127.0.0.1:8000/vid_process"
-            url = "https://syncv5-eagwezifvq-an.a.run.app/vid_process"
+            url = "https://syncv6-eagwezifvq-an.a.run.app/vid_process"
             params = {k:d[k] for k in d if k!='dim'}
             response = requests.get(url, params=params).json()
 
@@ -64,41 +65,28 @@ def processing(d):
         }
         df = pd.DataFrame(d)
 
-        #Plot results
-        p = figure(
-            title='Synchronisation Analysis',
-            x_axis_label='Timestamp',
-            y_axis_label='Error Score')
-        p.vbar(x=d['Time'], top=d['Error'])
-        st.bokeh_chart(p, use_container_width=True)
+        fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
+        graph = fig.data[0]
+        graph.layout.hovermode = 'closest'
+        graph.on_click(update_point)
+        
+        #graph on-click
+        def update_point(trace, points, selector):
+            # index = df.index[df['Time']==].tolist()
+            st.write(trace, points, selector)
+        
+        # fig = px.line(df, x="Time", y="Error")
+        # st.plotly_chart(fig, use_container_width=True)
 
         #Load processed video
         placeholder = st.empty()
         video_url = response['output_url']
         placeholder.video(video_url)
 
-        #Timestamp buttons
-        sorted_df = df.sort_values(by=['Error']).round(2).head(5)
-        timestamps = sorted_df['Time'].to_list()
-        sync = sorted_df['Error'].to_list()
-
-        with st.sidebar:
-            buttons = [
-                (st.button("A", "a"), timestamps[0], st.write(f'Time: {timestamps[0]}s, Error: {sync[0]}')),
-                (st.button("B", "b"), timestamps[1], st.write(f'Time: {timestamps[1]}s, Error: {sync[1]}')),
-                (st.button("C", "c"), timestamps[2], st.write(f'Time: {timestamps[2]}s, Error: {sync[2]}')),
-                (st.button("D", "d"), timestamps[3], st.write(f'Time: {timestamps[3]}s, Error: {sync[3]}')),
-                (st.button("E", "e"), timestamps[4], st.write(f'Time: {timestamps[4]}s, Error: {sync[4]}'))
-            ]
-        #empty placeholder to reload widget when different button is pressed
-        time_chosen = [v for k, v, _ in buttons if k == True]  # return time associated with a clicked button
-        if time_chosen:
-            placeholder.empty()
-            placeholder.video(video_url, start_time=time_chosen[0])
-
 
         with st.expander("**Model info:**"):
             st.dataframe(df)
+            
 
 def main():
 
@@ -118,7 +106,7 @@ def main():
     if uploaded_video is not None:
 
         with st_lottie_spinner(lottie_model_loading):
-            url = "https://syncv5-eagwezifvq-an.a.run.app/vid_stats"
+            url = "https://syncv6-eagwezifvq-an.a.run.app/vid_stats"
             # url = "http://127.0.0.1:8000/vid_stats"
             files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
             stats = requests.post(url, files=files).json()
