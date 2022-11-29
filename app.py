@@ -9,7 +9,7 @@ from htbuilder import div, big, h2, styles
 from htbuilder.units import rem
 from streamlit_lottie import st_lottie
 from streamlit_lottie import st_lottie_spinner
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 
 st.set_page_config(layout="wide", page_title="Dance Synchronisation")
 
@@ -71,7 +71,7 @@ def processing(d):
         def go_to_frame(trace, points, selector):
             # index = df.index[df['Time']==].tolist()
             st.write("test: ", trace, points, selector)
-            #image_placeholder.image(f'https://storage.googleapis.com/sync_testinput/screencaps/frame{}.jpg')
+            st.image(f'https://storage.googleapis.com/sync_testinput/screencaps/frame1.jpg')
 
         # fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
         # image_placeholder = st.empty()
@@ -83,7 +83,8 @@ def processing(d):
         fig = go.FigureWidget(fig.data, fig.layout)
         fig.data[0].on_click(go_to_frame)
         
-        st.plotly_chart(fig, use_container_width=True)
+        # st.plotly_chart(fig, use_container_width=True)
+        st.write(fig)
         
         # fig = px.line(df, x="Time", y="Error")
         # st.plotly_chart(fig, use_container_width=True)
