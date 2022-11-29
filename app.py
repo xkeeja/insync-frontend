@@ -97,9 +97,13 @@ def processing(d):
         with st.expander("**Score Card:**"):
             #overall score sensitive to outliers
             scaler = MinMaxScaler()
-            d['standard'] = scaler.fit_transform(d['Error'].values.reshape(-1,1))
-            st.write("Overall: ", d['standard'].mean())
+            d['scaled'] = scaler.fit_transform(d['Error'].values.reshape(-1,1))
+            st.write("Overall: ", d['scaled'].mean())
             #split dataframe into equal parts
+            split = np.array_split(d, 4)
+            st.write("Score for each quartile:")
+            for i, df in enumerate(split):
+                st.write(i, ": ", df['scaled'].mean())
 
         with st.expander("**Model info:**"):
             st.dataframe(df)
