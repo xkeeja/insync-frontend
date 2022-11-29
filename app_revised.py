@@ -1,48 +1,20 @@
 import streamlit as st
 import requests
-import math
 import pandas as pd
-import matplotlib as plt
-import seaborn as sns
-import numpy as np
-# import time
+import plotly.graph_objects as go
 from htbuilder import div, big, h2, styles
 from htbuilder.units import rem
 from streamlit_lottie import st_lottie
 from streamlit_lottie import st_lottie_spinner
-# from google.cloud import storage
-# from google.oauth2 import service_account
+
 
 st.set_page_config(layout="wide", page_title="Dance Synchronisation")
+
 
 #load css
 with open('style.css') as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-# # Set up google cloud
-# credentials = service_account.Credentials.from_service_account_info(
-#     st.secrets["gcp_service_account"]
-# )
-# client = storage.Client(credentials=credentials)
-# bucket = client.bucket("dance-sync-user-upload")
-
-# Retreive from backend
-# def get_file(source_blob, save_as, source_bucket=bucket):
-#     # bucket = client.bucket(source_bucket)
-#     blob = bucket.blob(source_blob)
-#     result = False
-#     #Keep trying to fetch blob until it exists
-#     start = time.time()
-#     while result is False:
-#         try:
-#             blob.download_to_filename(save_as)
-#             result = True
-#         except:
-#             time.sleep(1)
-#             if time.time() - start > 10:
-#                 break
-#             pass
-#     return result
 
 #animations
 def load_lottieurl(url: str):
@@ -58,6 +30,7 @@ lottie_url_api_loading = "https://assets2.lottiefiles.com/packages/lf20_rsgxuwx0
 lottie_api_loading = load_lottieurl(lottie_url_api_loading)
 lottie_url_model_loading = "https://assets1.lottiefiles.com/packages/lf20_c9uz3mrt.json"
 lottie_model_loading = load_lottieurl(lottie_url_model_loading)
+
 
 #pretty stats
 def display_dial(title, value, color):
@@ -77,43 +50,68 @@ def display_dial(title, value, color):
             unsafe_allow_html=True,
         )
 
+
 def processing(stats):
     with st_lottie_spinner(lottie_model_loading, key='xd'):
-        # url = "http://127.0.0.1:8000/vid_process"
-        url = "https://syncv5-eagwezifvq-an.a.run.app/vid_process"
+        url = "http://127.0.0.1:8000/vid_process"
+        # url = "https://syncv6-eagwezifvq-an.a.run.app/vid_process"
         params = {
             "vid_name": stats['vid_name'],
             "output_name": stats['output_name'],
             "frame_count": stats['frame_count'],
-            "fps": stats['fps']
+            "fps": stats['fps'],
+            "width": stats['width'],
+            "height": stats['height'],
+            "dancers": stats['dancers']
             }
         response = requests.get(url, params=params).json()
-        
-        # #Retreive database
-        # if get_file(source_blob='data.csv', save_as='data.csv'):
-        #     df = pd.read_csv('data.csv')
-        # else:
-        #     st.error("Dataframe request timeout")
-        # # try:
-        # #     url = "https://syncv3-eagwezifvq-an.a.run.app/vid_processed"
-        # #     data = requests.get(url)
-        # #     df = pd.json_normalize(data, record_path =['data'])
-        # # except:
-        # #     st.error("Database retrieval failed")
-        # #Retrieve video
-        # if not get_file(source_blob='video.mp4', save_as='video.mp4'):
-        #     st.error("Video request timeout")
 
     #Create df
     d = {
         'Time': response['timestamps'],
-        'Sync': response['scores']
+        'Sync Error': response['scores']
     }
     df = pd.DataFrame(d)
-    
-    #Plot results
-    df['Sync'] = df['Sync'] - 0.5
-    st.line_chart(data=df, x='Time', y='Sync')
+
+    #Calculate moving average for smoother graph
+    df['Smoothed Sync Error'] = df['Sync Error'].rolling(window=9).mean()
+
+    #Plot moving average graph
+    st.write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    st.write('The following graph shows your absolute synchronisation error, calculated as a difference in pose/angle of major joints relative to each other. A lower value is a smaller difference, and therefore better synchronization. Peaks are areas of lowest synchronisation.')
+    # st.line_chart(data=df, x='Time', y='Sync Error')
+    fig1 = go.Figure()
+    fig1.add_trace(go.Scatter(x=df.index, y=list(df['Sync Error'])))
+    fig1.update_layout(
+            title="Absolute Sync Error Graph",
+            xaxis_title="Frame",
+            yaxis_title="Absolute Sync Error",
+            font=dict(
+                family="Courier New, monospace",
+                size=18,
+                color="RebeccaPurple"
+                ),
+            hovermode='x unified')
+    st.plotly_chart(fig1)
+
+
+    st.write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    st.write('The following graph shows your average synchronisation error, smoothed for easier reference of intervals needing improvement or attention.')
+    # st.line_chart(data=df, x='Time', y='Smoothed Sync Error')
+    fig2 = go.Figure()
+    fig2.add_trace(go.Scatter(x=df.index, y=list(df['Smoothed Sync Error'])))
+    fig2.update_layout(
+            title="Smoothed Sync Error Graph",
+            xaxis_title="Frame",
+            yaxis_title="Smoothed Sync Error",
+            font=dict(
+                family="Courier New, monospace",
+                size=18,
+                color="RebeccaPurple"
+                ),
+            hovermode='x unified')
+    st.plotly_chart(fig2)
+
 
     #Load processed video
     video_url = response['output_url']
@@ -123,56 +121,19 @@ def processing(stats):
     # st.video(video_bytes)
 
     #Timestamp buttons
-    sorted_df = df.sort_values(by=['Sync']).round(2).head(5)
+    sorted_df = df.sort_values(by=['Smoothed Sync Error'], ascending=False).round(2).head(5)
+    index = sorted_df.head(5).index
+    top5imp = [i for i in index]
     timestamps = sorted_df['Time'].to_list()
-    sync = sorted_df['Sync'].to_list()
+    sync = sorted_df['Smoothed Sync Error'].to_list()
 
     with st.expander("**Your top five areas for improvement:**"):
-        # ## button method for displaying top 5 improvement areas
-        # # bool, moment, description
-        # button_col, video_col = st.columns(2)
-        # with button_col:
-        #     buttons = [
-        #         (st.button("A", "a"), timestamps[0], st.write(f'Time: {timestamps[0]}s, Sync: {sync[0]}')),
-        #         (st.button("B", "b"), timestamps[1], st.write(f'Time: {timestamps[1]}s, Sync: {sync[1]}')),
-        #         (st.button("C", "c"), timestamps[2], st.write(f'Time: {timestamps[2]}s, Sync: {sync[2]}')),
-        #         (st.button("D", "d"), timestamps[3], st.write(f'Time: {timestamps[3]}s, Sync: {sync[3]}')),
-        #         (st.button("E", "e"), timestamps[4], st.write(f'Time: {timestamps[4]}s, Sync: {sync[4]}'))
-        #     ]
-        # #empty placeholder to reload widget when different button is pressed
-        # with video_col:
-        #     placeholder = st.empty()
-        #     time_chosen = [v for k, v, t in buttons if k == True]  # return time associated with a clicked button
-        #     if time_chosen:
-        #         placeholder.empty()
-        #         placeholder.video(video_url, start_time=math.floor(time_chosen[0]))
-        
-        # radio method for displaying top 5 improvement areas
-        choice1 = f'Time: {timestamps[0]}s, Sync: {sync[0]}'
-        choice2 = f'Time: {timestamps[1]}s, Sync: {sync[1]}'
-        choice3 = f'Time: {timestamps[2]}s, Sync: {sync[2]}'
-        choice4 = f'Time: {timestamps[3]}s, Sync: {sync[3]}'
-        choice5 = f'Time: {timestamps[4]}s, Sync: {sync[4]}'
-        
-        radio = st.radio('**Select a timestamp**', (choice1, choice2, choice3, choice4, choice5,))
-        
-        if radio == choice1:
-            st.video(video_url, start_time=math.floor(timestamps[0]))
-        elif radio == choice2:
-            st.video(video_url, start_time=math.floor(timestamps[1]))
-        elif radio == choice2:
-            st.video(video_url, start_time=math.floor(timestamps[2]))
-        elif radio == choice2:
-            st.video(video_url, start_time=math.floor(timestamps[3]))
-        else:
-            st.video(video_url, start_time=math.floor(timestamps[4]))
-        
-            
-    with st.expander("**Model info:**"):
-    # df = pd.DataFrame(
-    #     np.random.randn(50, 20),
-    #     columns=('col %d' % i for i in range(20)))
-        st.dataframe(df)
+        for i in range(len(index)):
+            st.write(f"**Frame {index[i]}**")
+            st.write(f'Timestamp: {timestamps[i]}s, Absolute Sync Error: {sync[i]}')
+            st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{top5imp[i]}.jpg")
+            st.write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
 
 def main():
 
@@ -188,33 +149,42 @@ def main():
 
     #Receive video file from user upload
     uploaded_video = st.file_uploader("**Upload video for evaluation**", ['mp4'], key='dance')
+    
+    
     #If video has been uploaded
     if uploaded_video is not None:
 
+        #Post request with video file
         with st_lottie_spinner(lottie_model_loading):
-            url = "https://syncv5-eagwezifvq-an.a.run.app/vid_stats"
-            # url = "http://127.0.0.1:8000/vid_stats"
+            # url = "https://syncv6-eagwezifvq-an.a.run.app/vid_stats"
+            url = "http://127.0.0.1:8000/vid_stats"
             files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
             stats = requests.post(url, files=files).json()
 
+        #Return uploaded video
         _, b, _ = st.columns([1,4,1])
         with b:
             show_vid = st.video(uploaded_video)
+        
+        # a, b, c = st.columns(3)
+        # with a:
+        #     display_dial("FPS", f"{stats['fps']}", "#1C83E1")
+        # with b:
+        #     display_dial("FRAMES", f"{stats['frame_count']}", "#1C83E1")
+        # with c:
+        #     display_dial("DIMENSION", f"{stats['dim']}", "#1C83E1")
 
-        process_vid = False
-        a, b, c, _, d = st.columns(5)
+        _, a, _, b, _ = st.columns([1, 2, 1, 1, 1])
         with a:
-            display_dial("FPS", f"{stats['fps']}", "#1C83E1")
+            dancers = st.number_input("Enter number of dancers:", min_value=1, max_value=6)
         with b:
-            display_dial("FRAMES", f"{stats['frame_count']}", "#1C83E1")
-        with c:
-            display_dial("DIMENSION", f"{stats['dim']}", "#1C83E1")
-        with d:
             if st.button("Start"):
                 show_vid.empty()
                 process_vid = True
-        
+
+        process_vid = False
         if process_vid:
+            stats['dancers'] = dancers
             processing(stats)
 
 if __name__ == '__main__':
