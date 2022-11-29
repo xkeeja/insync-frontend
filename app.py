@@ -9,6 +9,7 @@ from htbuilder import div, big, h2, styles
 from htbuilder.units import rem
 from streamlit_lottie import st_lottie
 from streamlit_lottie import st_lottie_spinner
+from sklearn.preprocessing import StandardScaler
 
 st.set_page_config(layout="wide", page_title="Dance Synchronisation")
 
@@ -75,9 +76,10 @@ def processing(d):
         # fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
         # image_placeholder = st.empty()
         fig = px.line(df, x='Time', y='Error', title='Synchronisation Analysis',
-                        color='yellow', hover_name='idx')
+                        hover_name='idx')
         fig.update_xaxes(showgrid=False)
         fig.update_yaxes(showgrid=False)
+        fig.update_traces(line_color="yellow")
         fig = go.FigureWidget(fig.data, fig.layout)
         fig.data[0].on_click(go_to_frame)
         
@@ -91,6 +93,12 @@ def processing(d):
         video_url = response['output_url']
         placeholder.video(video_url)
 
+        with st.expander("**Score Card:**"):
+            #overall score sensitive to outliers
+            scaler = MinMaxScaler()
+            d['standard'] = scaler.fit_transform(d['Error'].values.reshape(-1,1))
+            st.write("Overall: ", d['standard'].mean())
+            #split dataframe into equal parts
 
         with st.expander("**Model info:**"):
             st.dataframe(df)
