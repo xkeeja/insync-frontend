@@ -52,7 +52,7 @@ def display_dial(title, value, color):
 @st.experimental_memo
 def processing(d):
     # url = "http://127.0.0.1:8000/vid_process"
-    url = "https://syncv8-eagwezifvq-an.a.run.app/vid_process"
+    url = "https://syncv9-eagwezifvq-an.a.run.app/vid_process"
     params = {k:d[k] for k in d if k!='dim'}
     response = requests.get(url, params=params).json()
     return response
@@ -60,7 +60,7 @@ def processing(d):
 
 @st.experimental_memo
 def fetch_stats(uploaded_video):
-    url = "https://syncv8-eagwezifvq-an.a.run.app/vid_stats"
+    url = "https://syncv9-eagwezifvq-an.a.run.app/vid_stats"
     # url = "http://127.0.0.1:8000/vid_stats"
     files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
     stats = requests.post(url, files=files).json()
@@ -101,8 +101,17 @@ def main():
         with c:
             display_dial("DIMENSION", f"{stats['dim']}", "#ff008c")
 
-        dancers = st.number_input("Number of dancers (1-6):", value=2, min_value=1, max_value=6)
-        stats['dancers'] = dancers
+
+        a, b, c = st.columns(3)
+        with a:
+            dancers = st.number_input("Number of dancers (1-6):", value=2, min_value=1, max_value=6)
+            stats['dancers'] = dancers
+        with b:
+            conf = st.number_input("Model confidence interval (0-100):", value=20, min_value=0, max_value=100)
+            stats['conf_threshold'] = conf
+        with c:
+            face = st.selectbox("Ignore faces:", ("True", "False"))
+            stats['face_ignored'] = face
 
         if st.checkbox("Click to start (RESET this checkbox to upload new video)"):
 
