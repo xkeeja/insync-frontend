@@ -85,6 +85,10 @@ def main():
     #If video has been uploaded
     if uploaded_video is not None:
 
+        #clear caches
+        fetch_stats.clear()
+        processing.clear()
+
         if 'video' not in st.session_state or uploaded_video.name != st.session_state.video:
             st.session_state.video = uploaded_video.name
             st.session_state.response = None
@@ -95,11 +99,11 @@ def main():
 
         a, b, c = st.columns([2,2,3])
         with a:
-            display_dial("FPS", f"{stats['fps']}", "#1C83E1")
+            display_dial("FPS", f"{stats['fps']}", "#ff008c")
         with b:
-            display_dial("FRAMES", f"{stats['frame_count']}", "#1C83E1")
+            display_dial("FRAMES", f"{stats['frame_count']}", "#ff008c")
         with c:
-            display_dial("DIMENSION", f"{stats['dim']}", "#1C83E1")
+            display_dial("DIMENSION", f"{stats['dim']}", "#ff008c")
 
         dancers = st.number_input("Number of dancers (1-6):", value=2, min_value=1, max_value=6)
         stats['dancers'] = dancers
