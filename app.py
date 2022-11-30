@@ -51,23 +51,20 @@ def display_dial(title, value, color):
 
 @st.experimental_memo
 def processing(d):
-    if isinstance(d, dict):
-        with st_lottie_spinner(lottie_model_loading, key='xd'):
-            # url = "http://127.0.0.1:8000/vid_process"
-            url = "https://syncv6-eagwezifvq-an.a.run.app/vid_process"
-            params = {k:d[k] for k in d if k!='dim'}
-            response = requests.get(url, params=params).json()
-            return response
+    # url = "http://127.0.0.1:8000/vid_process"
+    url = "https://syncv6-eagwezifvq-an.a.run.app/vid_process"
+    params = {k:d[k] for k in d if k!='dim'}
+    response = requests.get(url, params=params).json()
+    return response
             
 
 @st.experimental_memo
 def fetch_stats(uploaded_video):
-    with st_lottie_spinner(lottie_model_loading):
-            url = "https://syncv6-eagwezifvq-an.a.run.app/vid_stats"
-            # url = "http://127.0.0.1:8000/vid_stats"
-            files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
-            stats = requests.post(url, files=files).json()
-            return stats
+    url = "https://syncv6-eagwezifvq-an.a.run.app/vid_stats"
+    # url = "http://127.0.0.1:8000/vid_stats"
+    files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
+    stats = requests.post(url, files=files).json()
+    return stats
 
 def main():
 
@@ -93,7 +90,8 @@ def main():
             st.session_state.response = None
 
         show_vid = st.video(uploaded_video)
-        stats = fetch_stats(uploaded_video)
+        with st_lottie_spinner(lottie_model_loading):
+            stats = fetch_stats(uploaded_video)
 
         a, b, c, d = st.columns([2,2,3,2])
         with a:
@@ -116,7 +114,8 @@ def main():
             if st.session_state.response is not None:
                 response = st.session_state.response 
             else:
-                response = processing(stats)
+                with st_lottie_spinner(lottie_model_loading, key='xd'):
+                    response = processing(stats)
                 st.session_state.response = response
             
             #Empty space
