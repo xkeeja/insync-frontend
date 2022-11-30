@@ -80,7 +80,7 @@ def main():
     with col3:
         st_lottie(lottie_dancing, key="dance_right")
 
-    add_vertical_space(5)
+    add_vertical_space(3)
 
     #Receive video file from user upload
     uploaded_video = st.file_uploader("**Upload video for evaluation**", ['mp4'], key='dance')
@@ -167,36 +167,23 @@ def main():
             df['frames'] = df.index
             df['Smoothed_error'] = df['Error'].rolling(window=9).mean()
             df['Smoothed_link_error'] = df['Link_scores'].rolling(window=9).mean()
-            
-            #graph on-click
-            def go_to_frame(trace, points, selector):
-                # index = df.index[df['Time']==].tolist()
-                st.write("test: ", trace, points, selector)
-                st.image(f'https://storage.googleapis.com/sync_testinput/screencaps/frame1.jpg')
 
-            # fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
-            # image_placeholder = st.empty()
-            fig = px.line(df, x='frames', y='Smoothed_error', title='Synchronisation Analysis',
-                            hover_name='frames', labels={
-                                                     "frames": "Frame Number",
-                                                     "Smoothed_error": "Mean Absolute Error",
-                                                    },
-                    )
-            fig.update_xaxes(showgrid=False)
-            fig.update_yaxes(showgrid=False)
-            fig.update_traces(line_color="#ff008c")
-            fig = go.FigureWidget(fig.data, fig.layout)
-            fig.data[0].on_click(go_to_frame)
+            def create_fig(df, x, y, title, hover_name, labels):
+                fig = px.line(data=df, x=x, y=y, title=title,
+                                hover_name=hover_name, labels=labels)
+                fig.update_xaxes(showgrid=False)
+                fig.update_yaxes(showgrid=False)
+                fig.update_traces(line_color="#ff008c")
+                # fig = go.FigureWidget(fig.data, fig.layout)
+                return fig
 
-            fig2 = px.line(df, x='frames', y='Smoothed_link_error', title='Worst Actions',
-                            hover_name='Link_names', labels={
-                                                     "frames": "Frame Number",
-                                                     "Smoothed_link_error": "Max Error Body Part",
-                                                    },
-                    )
-            fig2.update_xaxes(showgrid=False)
-            fig2.update_yaxes(showgrid=False)
-            fig2.update_traces(line_color="#ff008c")
+            fig1 = create_fig(df, 'frames', 'Smoothed_error', 'Synchronisation Analysis',
+                                'frames', {'frames': 'Frame Number', 
+                                           'Smoothed_error': Mean Absolute Error'})
+
+            fig2 = create_fig(df, 'frames', 'Smoothed_link_error', 'Worst Actions',
+                                'Link_names', {'frames': 'Frame Number', 
+                                           'Smoothed_link_error': Max Error Body Part'})
 
             #Load processed video
             a, b = st.columns([1,4])
