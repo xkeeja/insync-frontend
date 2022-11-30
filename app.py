@@ -85,10 +85,6 @@ def main():
     #If video has been uploaded
     if uploaded_video is not None:
 
-        #clear caches
-        fetch_stats.clear()
-        processing.clear()
-
         if 'video' not in st.session_state or uploaded_video.name != st.session_state.video:
             st.session_state.video = uploaded_video.name
             st.session_state.response = None
@@ -116,6 +112,9 @@ def main():
             if st.session_state.response is not None:
                 response = st.session_state.response 
             else:
+                #clear caches
+                fetch_stats.clear()
+                processing.clear()
                 with st_lottie_spinner(lottie_model_loading, key='xd'):
                     response = processing(stats)
                 st.session_state.response = response
