@@ -198,7 +198,7 @@ def main():
                 video_url = response['output_url']
                 st.video(video_url)
             
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig1, use_container_width=True)
             st.plotly_chart(fig2, use_container_width=True)
 
             with st.expander("**Score Card:**"):
