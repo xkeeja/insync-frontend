@@ -190,7 +190,7 @@ def main():
                 for i, df_sorted in enumerate(split):
                     st.write(i+1, ": ", df_sorted['Error'].mean())
 
-            with st.expander('**View freeze frames:**')
+            with st.expander('**View freeze frames:**'):
                 frame = st.slider(label=None, 0, int(stats['frame_count']), 0)
                 a, b = st.columns(2)
                 with a:
