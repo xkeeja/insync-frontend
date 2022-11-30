@@ -204,7 +204,7 @@ def main():
                     header=dict(values=list(df.columns),
                                 fill_color='paleturquoise',
                                 align='left'),
-                    cells=dict(values=[df.frames, df.Time, df.Error, df.link_names, d.link_scores],
+                    cells=dict(values=[df.frames, df.Time, df.Error, df.Link_names, d.Link_scores],
                                fill_color='lavender',
                                align='left'))
                 ])
