@@ -12,7 +12,7 @@ from streamlit_lottie import st_lottie
 from streamlit_lottie import st_lottie_spinner
 from sklearn.preprocessing import MinMaxScaler
 
-st.set_page_config(layout="wide", page_title="Dance Synchronisation")
+st.set_page_config(page_title="in sync.")
 
 #load css
 with open('style.css') as f:
@@ -128,6 +128,7 @@ def main():
             }
             df = pd.DataFrame(d)
             df['frames'] = df.index
+            df['Smoothed_error'] = df['Error'].rolling(window=9).mean()
             
             #graph on-click
             def go_to_frame(trace, points, selector):
@@ -137,7 +138,7 @@ def main():
 
             # fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
             # image_placeholder = st.empty()
-            fig = px.line(df, x='frames', y='Error', title='Synchronisation Analysis',
+            fig = px.line(df, x='frames', y='Smoothed_error', title='Synchronisation Analysis',
                             hover_name='frames')
             fig.update_xaxes(showgrid=False)
             fig.update_yaxes(showgrid=False)
@@ -170,13 +171,14 @@ def main():
             with st.expander("**Score Card:**"):
                 #overall score sensitive to outliers
                 # scaler = MinMaxScaler()
-                # d['scaled'] = scaler.fit_transform(np.array(d['Error']).reshape(-1,1))
+                # df['scaled'] = scaler.fit_transform(np.array(df['Error']).reshape(-1,1))
                 # st.write("Overall: ", d['scaled'].mean())
                 #split dataframe into equal parts
-                split = np.array_split(d, 4)
+                df_sorted = df.sort_values(by=['Error'])
+                split = np.array_split(df_sorted, 4)
                 st.write("Score for each quartile:")
-                for i, df in enumerate(split):
-                    st.write(i, ": ", df['Error'].mean())
+                for i, df_sorted in enumerate(split):
+                    st.write(i, ": ", df_sorted['Error'].mean())
 
             st.write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
             frame = st.slider('select a frame to see 6 frames in succession', 0, int(stats['frame_count']), 0)
