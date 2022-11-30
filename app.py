@@ -52,7 +52,7 @@ def display_dial(title, value, color):
 @st.experimental_memo
 def processing(d):
     # url = "http://127.0.0.1:8000/vid_process"
-    url = "https://syncv7-eagwezifvq-an.a.run.app/vid_process"
+    url = "https://syncv8-eagwezifvq-an.a.run.app/vid_process"
     params = {k:d[k] for k in d if k!='dim'}
     response = requests.get(url, params=params).json()
     return response
@@ -60,7 +60,7 @@ def processing(d):
 
 @st.experimental_memo
 def fetch_stats(uploaded_video):
-    url = "https://syncv7-eagwezifvq-an.a.run.app/vid_stats"
+    url = "https://syncv8-eagwezifvq-an.a.run.app/vid_stats"
     # url = "http://127.0.0.1:8000/vid_stats"
     files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
     stats = requests.post(url, files=files).json()
@@ -138,7 +138,7 @@ def main():
             # fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
             # image_placeholder = st.empty()
             fig = px.line(df, x='frames', y='Error', title='Synchronisation Analysis',
-                            hover_name='idx')
+                            hover_name='frames')
             fig.update_xaxes(showgrid=False)
             fig.update_yaxes(showgrid=False)
             fig.update_traces(line_color="yellow")
@@ -155,7 +155,7 @@ def main():
             a, b = st.columns([1,3])
             with a:
                 colours = [
-                    st.color_picker('Perfect', 'brown'),
+                    st.color_picker('Perfect', '#013220'),
                     st.color_picker('Good Effort', 'green'),
                     st.color_picker('Average', 'orange'),
                     st.color_picker('You Suck', 'red')
