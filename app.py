@@ -165,7 +165,7 @@ def main():
             fig2.update_traces(line_color="#ff008c")
 
             #Load processed video
-            a, b = st.columns([1,3])
+            a, b = st.columns([1,4])
             with a:
                 colours = [
                     st.color_picker('Perfect', '#41961A'),
