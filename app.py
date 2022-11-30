@@ -191,7 +191,7 @@ def main():
                     st.write(i+1, ": ", df_sorted['Error'].mean())
 
             with st.expander('**View freeze frames:**'):
-                frame = st.slider(label=None, 0, int(stats['frame_count']), 0)
+                frame = st.slider("View frames starting from choice", 0, int(stats['frame_count']), 0, label_visibility='hidden')
                 a, b = st.columns(2)
                 with a:
                     st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame}.jpg")
