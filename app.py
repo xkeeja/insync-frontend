@@ -93,6 +93,7 @@ def main():
         with st_lottie_spinner(lottie_model_loading):
             stats = fetch_stats(uploaded_video)
 
+        stats['dancers'] = 2
         a, b, c, d = st.columns([2,2,3,2])
         with a:
             display_dial("FPS", f"{stats['fps']}", "#1C83E1")
@@ -103,7 +104,7 @@ def main():
         with d:
             display_dial("# DANCERS", f"{stats['dancers']}", "#1C83E1")
 
-        dancers = st.number_input("Number of dancers (1-6):", min_value=1, max_value=6)
+        dancers = st.number_input("Number of dancers (1-6):", value=2, min_value=1, max_value=6)
         stats['dancers'] = dancers
 
         if st.checkbox("click checkbox to start (RESET this checkbox when new file is uploaded)"):
