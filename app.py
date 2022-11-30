@@ -52,7 +52,7 @@ def display_dial(title, value, color):
 @st.experimental_memo
 def processing(d):
     # url = "http://127.0.0.1:8000/vid_process"
-    url = "https://syncv6-eagwezifvq-an.a.run.app/vid_process"
+    url = "https://syncv7-eagwezifvq-an.a.run.app/vid_process"
     params = {k:d[k] for k in d if k!='dim'}
     response = requests.get(url, params=params).json()
     return response
@@ -60,7 +60,7 @@ def processing(d):
 
 @st.experimental_memo
 def fetch_stats(uploaded_video):
-    url = "https://syncv6-eagwezifvq-an.a.run.app/vid_stats"
+    url = "https://syncv7-eagwezifvq-an.a.run.app/vid_stats"
     # url = "http://127.0.0.1:8000/vid_stats"
     files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
     stats = requests.post(url, files=files).json()
@@ -93,21 +93,18 @@ def main():
         with st_lottie_spinner(lottie_model_loading):
             stats = fetch_stats(uploaded_video)
 
-        stats['dancers'] = 2
-        a, b, c, d = st.columns([2,2,3,2])
+        a, b, c = st.columns([2,2,3])
         with a:
             display_dial("FPS", f"{stats['fps']}", "#1C83E1")
         with b:
             display_dial("FRAMES", f"{stats['frame_count']}", "#1C83E1")
         with c:
             display_dial("DIMENSION", f"{stats['dim']}", "#1C83E1")
-        with d:
-            display_dial("# DANCERS", f"{stats['dancers']}", "#1C83E1")
 
         dancers = st.number_input("Number of dancers (1-6):", value=2, min_value=1, max_value=6)
         stats['dancers'] = dancers
 
-        if st.checkbox("click checkbox to start (RESET this checkbox when new file is uploaded)"):
+        if st.checkbox("Click to start (RESET this checkbox to upload new video)"):
 
             show_vid.empty()
             st.text('')
