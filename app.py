@@ -179,11 +179,11 @@ def main():
 
             fig1 = create_fig(df, 'frames', 'Smoothed_error', 'Synchronisation Analysis',
                                 'frames', {'frames': 'Frame Number', 
-                                           'Smoothed_error': Mean Absolute Error'})
+                                           'Smoothed_error': 'Mean Absolute Error'})
 
             fig2 = create_fig(df, 'frames', 'Smoothed_link_error', 'Worst Actions',
                                 'Link_names', {'frames': 'Frame Number', 
-                                           'Smoothed_link_error': Max Error Body Part'})
+                                               'Smoothed_link_error': 'Max Error Body Part'})
 
             #Load processed video
             a, b = st.columns([1,4])
