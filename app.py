@@ -141,15 +141,15 @@ def main():
                             hover_name='frames')
             fig.update_xaxes(showgrid=False)
             fig.update_yaxes(showgrid=False)
-            fig.update_traces(line_color="yellow")
+            fig.update_traces(line_color="ff008c")
             fig = go.FigureWidget(fig.data, fig.layout)
             fig.data[0].on_click(go_to_frame)
 
-            fig2 = px.line(df, x='frames', y='link_scores', title='Worst Actions',
-                            hover_name='link_names')
+            fig2 = px.line(df, x='frames', y='Link_scores', title='Worst Actions',
+                            hover_name='Link_names')
             fig2.update_xaxes(showgrid=False)
             fig2.update_yaxes(showgrid=False)
-            fig2.update_traces(line_color="yellow")
+            fig2.update_traces(line_color="ff008c")
 
             #Load processed video
             a, b = st.columns([1,3])
