@@ -129,6 +129,7 @@ def main():
             df = pd.DataFrame(d)
             df['frames'] = df.index
             df['Smoothed_error'] = df['Error'].rolling(window=9).mean()
+            df['Smoothed_link_error'] = df['Link_scores'].rolling(window=9).mean()
             
             #graph on-click
             def go_to_frame(trace, points, selector):
@@ -139,15 +140,23 @@ def main():
             # fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
             # image_placeholder = st.empty()
             fig = px.line(df, x='frames', y='Smoothed_error', title='Synchronisation Analysis',
-                            hover_name='frames')
+                            hover_name='frames', labels={
+                                                     "frames": "Frame Number",
+                                                     "Smoothed_error": "Mean Absolute Error",
+                                                    },
+                    )
             fig.update_xaxes(showgrid=False)
             fig.update_yaxes(showgrid=False)
             fig.update_traces(line_color="#ff008c")
             fig = go.FigureWidget(fig.data, fig.layout)
             fig.data[0].on_click(go_to_frame)
 
-            fig2 = px.line(df, x='frames', y='Link_scores', title='Worst Actions',
-                            hover_name='Link_names')
+            fig2 = px.line(df, x='frames', y='Smoothed_link_scores', title='Worst Actions',
+                            hover_name='Link_names', labels={
+                                                     "frames": "Frame Number",
+                                                     "Smoothedlink_scores": "Max Error Body Part",
+                                                    },
+                    )
             fig2.update_xaxes(showgrid=False)
             fig2.update_yaxes(showgrid=False)
             fig2.update_traces(line_color="#ff008c")
@@ -170,37 +179,33 @@ def main():
 
             with st.expander("**Score Card:**"):
                 #overall score sensitive to outliers
-                # scaler = MinMaxScaler()
-                # df['scaled'] = scaler.fit_transform(np.array(df['Error']).reshape(-1,1))
-                # st.write("Overall: ", d['scaled'].mean())
+                scaler = MinMaxScaler()
+                df['scaled'] = scaler.fit_transform(np.array(df['Error']).reshape(-1,1))
+                overall_score = (1 - df['scaled'].mean()) * 100
+                st.write("Overall score: ", overall_score, "%")
                 #split dataframe into equal parts
                 df_sorted = df.sort_values(by=['Error'])
                 split = np.array_split(df_sorted, 4)
                 st.write("Score for each quartile:")
                 for i, df_sorted in enumerate(split):
-                    st.write(i, ": ", df_sorted['Error'].mean())
+                    st.write(i+1, ": ", df_sorted['Error'].mean())
 
-            st.write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            frame = st.slider('select a frame to see 6 frames in succession', 0, int(stats['frame_count']), 0)
-            a, b, c = st.columns([1, 1, 1])
-            with a:
-                st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame}.jpg")
-            with b:
-                st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+1}.jpg")
-            with c:
-                st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+2}.jpg")
-            
-            d, e, f = st.columns([1, 1, 1])
-            with d:
-                st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+3}.jpg")
-            with e:
-                st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+4}.jpg")
-            with f:
-                st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+5}.jpg")
+            with st.expander('**View freeze frames:**')
+                frame = st.slider(label=None, 0, int(stats['frame_count']), 0)
+                a, b = st.columns(2)
+                with a:
+                    st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame}.jpg")
+                with b:
+                    st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+1}.jpg")
+                c, d = st.columns(2)
+                with c:
+                    st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+2}.jpg")
+                with d:
+                    st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+3}.jpg")
 
             with st.expander("**Model info:**"):
                 # st.dataframe(df)
-                fig = go.Figure(data=[go.Table(
+                fig3 = go.Figure(data=[go.Table(
                     header=dict(values=list(df.columns),
                                 fill_color='paleturquoise',
                                 align='left'),
@@ -208,6 +213,7 @@ def main():
                                fill_color='lavender',
                                align='left'))
                 ])
+                st.write(fig3)
 
 if __name__ == '__main__':
     main()
