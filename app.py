@@ -155,10 +155,10 @@ def main():
             a, b = st.columns([1,3])
             with a:
                 colours = [
-                    st.color_picker('Perfect', '#013220'),
-                    st.color_picker('Good Effort', 'green'),
-                    st.color_picker('Average', 'orange'),
-                    st.color_picker('You Suck', 'red')
+                    st.color_picker('Perfect', '#41961A'),
+                    st.color_picker('Good Effort', '#A6D96A'),
+                    st.color_picker('Average', '#FDAE61'),
+                    st.color_picker('You Suck', '#D7191C')
                 ]
             with b:
                 video_url = response['output_url']
