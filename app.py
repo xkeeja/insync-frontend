@@ -28,8 +28,6 @@ def load_lottieurl(url: str):
 #load animations
 lottie_url_dancing = "https://assets7.lottiefiles.com/packages/lf20_owg7kezi.json"
 lottie_dancing = load_lottieurl(lottie_url_dancing)
-lottie_url_api_loading = "https://assets2.lottiefiles.com/packages/lf20_rsgxuwx0.json"
-lottie_api_loading = load_lottieurl(lottie_url_api_loading)
 lottie_url_model_loading = "https://assets1.lottiefiles.com/packages/lf20_c9uz3mrt.json"
 lottie_model_loading = load_lottieurl(lottie_url_model_loading)
 
@@ -51,6 +49,7 @@ def display_dial(title, value, color):
             unsafe_allow_html=True,
         )
 
+@st.experimental_memo
 def processing(d):
     if isinstance(d, dict):
         with st_lottie_spinner(lottie_model_loading, key='xd'):
@@ -58,61 +57,17 @@ def processing(d):
             url = "https://syncv6-eagwezifvq-an.a.run.app/vid_process"
             params = {k:d[k] for k in d if k!='dim'}
             response = requests.get(url, params=params).json()
-
-        #Create df
-        st.write(response)
-        d = {
-            'Time': response['timestamps'],
-            'Error': response['scores']
-        }
-        df = pd.DataFrame(d)
-        df['idx'] = df.index
-        
-        #graph on-click
-        def go_to_frame(trace, points, selector):
-            # index = df.index[df['Time']==].tolist()
-            st.write("test: ", trace, points, selector)
-            st.image(f'https://storage.googleapis.com/sync_testinput/screencaps/frame1.jpg')
-
-        # fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
-        # image_placeholder = st.empty()
-        fig = px.line(df, x='Time', y='Error', title='Synchronisation Analysis',
-                        hover_name='idx')
-        fig.update_xaxes(showgrid=False)
-        fig.update_yaxes(showgrid=False)
-        fig.update_traces(line_color="yellow")
-        fig = go.FigureWidget(fig.data, fig.layout)
-        fig.data[0].on_click(go_to_frame)
-        
-        st.plotly_chart(fig, use_container_width=True)
-
-        #Load processed video
-        placeholder = st.empty()
-        video_url = response['output_url']
-        placeholder.video(video_url)
-
-        with st.expander("**Score Card:**"):
-            #overall score sensitive to outliers
-            # scaler = MinMaxScaler()
-            # d['scaled'] = scaler.fit_transform(np.array(d['Error']).reshape(-1,1))
-            # st.write("Overall: ", d['scaled'].mean())
-            #split dataframe into equal parts
-            split = np.array_split(d, 4)
-            st.write("Score for each quartile:")
-            for i, df in enumerate(split):
-                st.write(i, ": ", df['Error'].mean())
-
-        with st.expander("**Model info:**"):
-            # st.dataframe(df)
-            fig = go.Figure(data=[go.Table(
-                header=dict(values=list(d.columns),
-                            fill_color='paleturquoise',
-                            align='left'),
-                cells=dict(values=[d.idx, df.Time, df.Error],
-                           fill_color='lavender',
-                           align='left'))
-            ])
+            return response
             
+
+@st.experimental_memo
+def fetch_stats(uploaded_video):
+    with st_lottie_spinner(lottie_model_loading):
+            url = "https://syncv6-eagwezifvq-an.a.run.app/vid_stats"
+            # url = "http://127.0.0.1:8000/vid_stats"
+            files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
+            stats = requests.post(url, files=files).json()
+            return stats
 
 def main():
 
@@ -121,7 +76,9 @@ def main():
     with col1:
         st_lottie(lottie_dancing, key="dance_left")
     with col2:
-        st.markdown("<h1 style='text-align: center; color: yellow;'>Dance Synchronisation</h1>", unsafe_allow_html=True)
+        with col2:
+            st.markdown("<h1 style='text-align: center; color: RebeccaPurple;'>in sync.</h1>", unsafe_allow_html=True)
+            st.markdown("<h3 style='text-align: center; color: #ff008c;'>Your personal AI<br/>synchronisation assistant.</h3>", unsafe_allow_html=True)
     with col3:
         st_lottie(lottie_dancing, key="dance_right")
 
@@ -131,18 +88,14 @@ def main():
     #If video has been uploaded
     if uploaded_video is not None:
 
-        with st_lottie_spinner(lottie_model_loading):
-            url = "https://syncv6-eagwezifvq-an.a.run.app/vid_stats"
-            # url = "http://127.0.0.1:8000/vid_stats"
-            files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
-            stats = requests.post(url, files=files).json()
+        if 'video' not in st.session_state or uploaded_video.name != st.session_state.video:
+            st.session_state.video = uploaded_video.name
+            st.session_state.response = None
 
-        _, b, _ = st.columns([1,4,1])
-        with b:
-            show_vid = st.video(uploaded_video)
+        show_vid = st.video(uploaded_video)
+        stats = fetch_stats(uploaded_video)
 
-        process_vid = False
-        a, b, c, _, d = st.columns([2,2,2,1,2])
+        a, b, c, d = st.columns([2,2,3,2])
         with a:
             display_dial("FPS", f"{stats['fps']}", "#1C83E1")
         with b:
@@ -150,12 +103,112 @@ def main():
         with c:
             display_dial("DIMENSION", f"{stats['dim']}", "#1C83E1")
         with d:
-            if st.button("Start"):
-                show_vid.empty()
-                process_vid = True
+            display_dial("# DANCERS", f"{stats['dancers']}", "#1C83E1")
 
-        if process_vid:
-            processing(stats)
+        dancers = st.number_input("Number of dancers (1-6):", min_value=1, max_value=6)
+        stats['dancers'] = dancers
+
+        if st.checkbox("click checkbox to start (RESET this checkbox when new file is uploaded)"):
+
+            show_vid.empty()
+            st.text('')
+            
+            if st.session_state.response is not None:
+                response = st.session_state.response 
+            else:
+                response = processing(stats)
+                st.session_state.response = response
+            
+            #Empty space
+            st.text('')
+
+            #Create df
+            d = {
+                'Time': response['timestamps'],
+                'Error': response['scores'],
+                'Link_scores': response['link_scores'],
+                'Link_names': response['link_names']
+            }
+            df = pd.DataFrame(d)
+            df['frames'] = df.index
+            
+            #graph on-click
+            def go_to_frame(trace, points, selector):
+                # index = df.index[df['Time']==].tolist()
+                st.write("test: ", trace, points, selector)
+                st.image(f'https://storage.googleapis.com/sync_testinput/screencaps/frame1.jpg')
+
+            # fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
+            # image_placeholder = st.empty()
+            fig = px.line(df, x='frames', y='Error', title='Synchronisation Analysis',
+                            hover_name='idx')
+            fig.update_xaxes(showgrid=False)
+            fig.update_yaxes(showgrid=False)
+            fig.update_traces(line_color="yellow")
+            fig = go.FigureWidget(fig.data, fig.layout)
+            fig.data[0].on_click(go_to_frame)
+
+            fig2 = px.line(df, x='frames', y='link_scores', title='Worst Actions',
+                            hover_name='link_names')
+            fig2.update_xaxes(showgrid=False)
+            fig2.update_yaxes(showgrid=False)
+            fig2.update_traces(line_color="yellow")
+
+            #Load processed video
+            a, b = st.columns([1,3])
+            with a:
+                colours = [
+                    st.color_picker('Perfect', 'brown'),
+                    st.color_picker('Good Effort', 'green'),
+                    st.color_picker('Average', 'orange'),
+                    st.color_picker('You Suck', 'red')
+                ]
+            with b:
+                video_url = response['output_url']
+                st.video(video_url)
+            
+            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig2, use_container_width=True)
+
+            with st.expander("**Score Card:**"):
+                #overall score sensitive to outliers
+                # scaler = MinMaxScaler()
+                # d['scaled'] = scaler.fit_transform(np.array(d['Error']).reshape(-1,1))
+                # st.write("Overall: ", d['scaled'].mean())
+                #split dataframe into equal parts
+                split = np.array_split(d, 4)
+                st.write("Score for each quartile:")
+                for i, df in enumerate(split):
+                    st.write(i, ": ", df['Error'].mean())
+
+            st.write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            frame = st.slider('select a frame to see 6 frames in succession', 0, int(stats['frame_count']), 0)
+            a, b, c = st.columns([1, 1, 1])
+            with a:
+                st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame}.jpg")
+            with b:
+                st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+1}.jpg")
+            with c:
+                st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+2}.jpg")
+            
+            d, e, f = st.columns([1, 1, 1])
+            with d:
+                st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+3}.jpg")
+            with e:
+                st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+4}.jpg")
+            with f:
+                st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+5}.jpg")
+
+            with st.expander("**Model info:**"):
+                # st.dataframe(df)
+                fig = go.Figure(data=[go.Table(
+                    header=dict(values=list(df.columns),
+                                fill_color='paleturquoise',
+                                align='left'),
+                    cells=dict(values=[df.frames, df.Time, df.Error, df.link_names, d.link_scores],
+                               fill_color='lavender',
+                               align='left'))
+                ])
 
 if __name__ == '__main__':
     main()

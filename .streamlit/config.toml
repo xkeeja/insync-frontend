@@ -1,6 +1,9 @@
 [theme]
 primaryColor="yellow"
-backgroundColor="#070150"
+backgroundColor="#0F111A"
 secondaryBackgroundColor="#1a4ba6"
 textColor="#ffffff"
 font="monospace"
+
+[server]
+maxUploadSize = 30
