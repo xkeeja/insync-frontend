@@ -11,6 +11,7 @@ from htbuilder.units import rem
 from streamlit_lottie import st_lottie
 from streamlit_lottie import st_lottie_spinner
 from sklearn.preprocessing import MinMaxScaler
+from streamlit_extras.add_vertical_space import add_vertical_space
 
 st.set_page_config(page_title="in sync.")
 
@@ -79,6 +80,7 @@ def main():
     with col3:
         st_lottie(lottie_dancing, key="dance_right")
 
+    add_vertical_space(5)
 
     #Receive video file from user upload
     uploaded_video = st.file_uploader("**Upload video for evaluation**", ['mp4'], key='dance')
@@ -227,7 +229,7 @@ def main():
 
             with st.expander('**View freeze frames:**'):
                 frame = st.slider("View frames starting from choice", 0, int(stats['frame_count']), 0, label_visibility='hidden')
-                a, b = st.columns(2, gap='medium')
+                a, b = st.columns(2)
                 with a:
                     st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame}.jpg")
                 with b:
