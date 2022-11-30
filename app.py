@@ -204,16 +204,16 @@ def main():
                     st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+3}.jpg")
 
             with st.expander("**Model info:**"):
-                # st.dataframe(df)
-                fig3 = go.Figure(data=[go.Table(
-                    header=dict(values=list(df.columns),
-                                fill_color='paleturquoise',
-                                align='left'),
-                    cells=dict(values=[df.frames, df.Time, df.Error, df.Link_names, d.Link_scores],
-                               fill_color='lavender',
-                               align='left'))
-                ])
-                st.write(fig3)
+                st.dataframe(df)
+                # fig3 = go.Figure(data=[go.Table(
+                #     header=dict(values=list(df.columns),
+                #                 fill_color='paleturquoise',
+                #                 align='left'),
+                #     cells=dict(values=[df.frames, df.Time, df.Error, df.Link_names, d.Link_scores],
+                #                fill_color='lavender',
+                #                align='left'))
+                # ])
+                # st.write(fig3)
 
 if __name__ == '__main__':
     main()
