@@ -113,30 +113,30 @@ def main():
         #     face = st.selectbox("Ignore faces:", ("True", "False"))
         #     stats['face_ignored'] = face
 
-        sidebar = st.sidebar.title("Menu")
-        st.markdown(
-                    """
-                    <style>
-                    [data-testid="stSidebar"][aria-expanded="true"] > div:first-child{
-                        width : 350px
-                    }
-                    [data-testid="stSidebar"][aria-expanded="false"] > div:first-child{
-                        width : 350px
-                        margin-left: -350px
-                    }
-                    </style>
-                    """,
-                    unsafe_allow_html=True
-        )
-        dancers = sidebar.number_input("Number of dancers (1-6):", value=2, min_value=1, max_value=6)
-        stats['dancers'] = dancers
-        conf = sidebar.number_input("Confidence interval (0-100%):", value=20, min_value=0, max_value=100)
-        stats['conf_threshold'] = conf / 100
-        face = sidebar.selectbox("Ignore faces:", ("True", "False"))
-        stats['face_ignored'] = face
+        # st.markdown(
+        #             """
+        #             <style>
+        #             [data-testid="stSidebar"][aria-expanded="true"] > div:first-child{
+        #                 width : 350px
+        #             }
+        #             [data-testid="stSidebar"][aria-expanded="false"] > div:first-child{
+        #                 width : 350px
+        #                 margin-left: -350px
+        #             }
+        #             </style>
+        #             """,
+        #             unsafe_allow_html=True
+        # )
+        with st.sidebar:
+            dancers = st.number_input("Number of dancers (1-6):", value=2, min_value=1, max_value=6)
+            stats['dancers'] = dancers
+            conf = st.number_input("Confidence interval (0-100%):", value=20, min_value=0, max_value=100)
+            stats['conf_threshold'] = conf / 100
+            face = st.selectbox("Ignore faces:", ("True", "False"))
+            stats['face_ignored'] = face
 
 
-        if sidebar.checkbox("Click to start (RESET this checkbox to upload new video)"):
+        if st.sidebar.checkbox("Click to start (RESET this checkbox to upload new video)"):
 
             show_vid.empty()
             st.text('')
