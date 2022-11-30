@@ -151,10 +151,10 @@ def main():
             fig = go.FigureWidget(fig.data, fig.layout)
             fig.data[0].on_click(go_to_frame)
 
-            fig2 = px.line(df, x='frames', y='Smoothed_link_scores', title='Worst Actions',
+            fig2 = px.line(df, x='frames', y='Smoothed_link_error', title='Worst Actions',
                             hover_name='Link_names', labels={
                                                      "frames": "Frame Number",
-                                                     "Smoothedlink_scores": "Max Error Body Part",
+                                                     "Smoothed_link_error": "Max Error Body Part",
                                                     },
                     )
             fig2.update_xaxes(showgrid=False)
