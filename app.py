@@ -168,8 +168,8 @@ def main():
             df['Smoothed_error'] = df['Error'].rolling(window=9).mean()
             df['Smoothed_link_error'] = df['Link_scores'].rolling(window=9).mean()
 
-            def create_fig(df, x, y, title, hover_name, labels):
-                fig = px.line(data=df, x=x, y=y, title=title,
+            def create_fig(x, y, title, hover_name, labels):
+                fig = px.line(df, x=x, y=y, title=title,
                                 hover_name=hover_name, labels=labels)
                 fig.update_xaxes(showgrid=False)
                 fig.update_yaxes(showgrid=False)
@@ -177,11 +177,11 @@ def main():
                 # fig = go.FigureWidget(fig.data, fig.layout)
                 return fig
 
-            fig1 = create_fig(df, 'frames', 'Smoothed_error', 'Synchronisation Analysis',
+            fig1 = create_fig('frames', 'Smoothed_error', 'Synchronisation Analysis',
                                 'frames', {'frames': 'Frame Number', 
                                            'Smoothed_error': 'Mean Absolute Error'})
 
-            fig2 = create_fig(df, 'frames', 'Smoothed_link_error', 'Worst Actions',
+            fig2 = create_fig('frames', 'Smoothed_link_error', 'Worst Actions',
                                 'Link_names', {'frames': 'Frame Number', 
                                                'Smoothed_link_error': 'Max Error Body Part'})
 
