@@ -102,18 +102,41 @@ def main():
             display_dial("DIMENSION", f"{stats['dim']}", "#ff008c")
 
 
-        a, b, c = st.columns(3)
-        with a:
-            dancers = st.number_input("Number of dancers (1-6):", value=2, min_value=1, max_value=6)
-            stats['dancers'] = dancers
-        with b:
-            conf = st.number_input("Model confidence interval (0-100):", value=20, min_value=0, max_value=100)
-            stats['conf_threshold'] = conf
-        with c:
-            face = st.selectbox("Ignore faces:", ("True", "False"))
-            stats['face_ignored'] = face
+        # a, b, c = st.columns(3)
+        # with a:
+        #     dancers = st.number_input("Number of dancers (1-6):", value=2, min_value=1, max_value=6)
+        #     stats['dancers'] = dancers
+        # with b:
+        #     conf = st.number_input("Model confidence interval (0-100):", value=20, min_value=0, max_value=100)
+        #     stats['conf_threshold'] = conf
+        # with c:
+        #     face = st.selectbox("Ignore faces:", ("True", "False"))
+        #     stats['face_ignored'] = face
 
-        if st.checkbox("Click to start (RESET this checkbox to upload new video)"):
+        sidebar = st.sidebar.title("Menu")
+        st.markdown(
+                    """
+                    <style>
+                    [data-testid="stSidebar"][aria-expanded="true"] > div:first-child{
+                        width : 350px
+                    }
+                    [data-testid="stSidebar"][aria-expanded="false"] > div:first-child{
+                        width : 350px
+                        margin-left: -350px
+                    }
+                    </style>
+                    """,
+                    unsafe_allow_html=True
+        )
+        dancers = sidebar.number_input("Number of dancers (1-6):", value=2, min_value=1, max_value=6)
+        stats['dancers'] = dancers
+        conf = sidebar.number_input("Confidence interval (0-100%):", value=20, min_value=0, max_value=100)
+        stats['conf_threshold'] = conf / 100
+        face = sidebar.selectbox("Ignore faces:", ("True", "False"))
+        stats['face_ignored'] = face
+
+
+        if sidebar.checkbox("Click to start (RESET this checkbox to upload new video)"):
 
             show_vid.empty()
             st.text('')
