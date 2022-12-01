@@ -75,8 +75,8 @@ def main():
         st_lottie(lottie_dancing, key="dance_left")
     with col2:
         with col2:
-            st.markdown("<h1 style='text-align: center; color: RebeccaPurple;'>in sync.</h1>", unsafe_allow_html=True)
-            st.markdown("<h3 style='text-align: center; color: #ff008c;'>Your personal AI<br/>synchronisation assistant.</h3>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center; color: RebeccaPurple; font-family: Poppins;'>in sync.</h1>", unsafe_allow_html=True)
+            st.markdown("<h3 style='text-align: center; color: #ff008c; font-family: Quattrocento Sans;'>Your personal AI<br/>synchronisation assistant.</h3>", unsafe_allow_html=True)
     with col3:
         st_lottie(lottie_dancing, key="dance_right")
 
@@ -166,6 +166,8 @@ def main():
             }
             df = pd.DataFrame(d)
             df['frames'] = df.index
+            #none to nan
+            df['Error'] = np.where(df['Error'] == None, np.nan, df['Error'])
             #separate low confidence frames
             df['good_scores'] = np.where(df['bools'] == True, df['Error'], np.nan)
             df['bad_scores'] = np.where(df['bools'] == False, df['Error'], np.nan)
@@ -227,10 +229,11 @@ def main():
                 #overall score sensitive to outliers
                 scaler = MinMaxScaler()
                 df['scaled'] = scaler.fit_transform(np.array(df['Error']).reshape(-1,1))
-                overall_score = (1 - df['scaled'].mean()) * 100
-                st.write("Overall score: ", overall_score, "%")
+                overall_score = (1 - df['scaled'].nanmean()) * 100
+                st.write("Overall score: ", df['Error'].nanmean(), "%")
+                st.write("Scaled score: ", overall_score, "%")
                 #split dataframe into equal parts
-                df_sorted = df.sort_values(by=['Error'])
+                df_sorted = df.dropna().sort_values(by=['Error'])
                 split = np.array_split(df_sorted, 4)
                 st.write("Score for each quartile:")
                 for i, df_sorted in enumerate(split):
