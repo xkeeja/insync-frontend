@@ -230,8 +230,8 @@ def main():
                 #overall score sensitive to outliers
                 scaler = MinMaxScaler()
                 df['scaled'] = scaler.fit_transform(np.array(df['Error']).reshape(-1,1))
-                overall_score = (1 - np.array(df['scaled']).nanmean()) * 100
-                st.write("Overall score: ", (1 - df['Error'].nanmean()) * 100, "%")
+                overall_score = (1 - np.nanmean(df['scaled'])) * 100
+                st.write("Overall score: ", (1 - np.nanmean(df['Error'])) * 100, "%")
                 st.write("Scaled score: ", overall_score, "%")
                 #split dataframe into equal parts
                 df_sorted = df.dropna().sort_values(by=['Error'])
