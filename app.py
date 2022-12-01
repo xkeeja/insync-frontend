@@ -170,8 +170,8 @@ def main():
             #none to nan
             df['Error'] = np.where(df['Error'] == None, np.nan, df['Error'])
             #separate low confidence frames
-            df['good_scores'] = np.where(df['bools'] == True, df['Error'], np.nan)
-            df['bad_scores'] = np.where(df['bools'] == False, df['Error'], np.nan)
+            df['good_scores'] = np.where(df['bools'] == False, df['Error'], np.nan)
+            df['bad_scores'] = np.where(df['bools'] == True, df['Error'], np.nan)
             #smoother graphs
             df['Smoothed_error'] = df['good_scores'].rolling(window=5).mean()
             df['Smoothed_error_bad'] = df['bad_scores'].rolling(window=5).mean()
@@ -182,7 +182,7 @@ def main():
                                 hover_name=hover_name, labels=labels)
                 fig.update_xaxes(showgrid=False)
                 fig.update_yaxes(showgrid=False)
-                fig.update_traces(line_color="#ff008c")
+                fig.update_traces(line_color="blue")
                 return fig
 
             fig1 = create_fig('frames', 'good_scores', 'Synchronisation Analysis',
