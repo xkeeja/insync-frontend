@@ -185,7 +185,7 @@ def main():
             fig1 = create_fig('frames', 'Smoothed_error', 'Synchronisation Analysis',
                                 'frames', {'frames': 'Frame Number', 
                                            'Smoothed_error': 'Mean Absolute Error'})
-            fig.add_trace(
+            fig1.add_trace(
                 go.Scatter(
                     x=df['frames'],
                     y=df['Smoothed_error_bad'],
