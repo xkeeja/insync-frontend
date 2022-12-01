@@ -75,7 +75,7 @@ def main():
     with col2:
         with col2:
             st.markdown("<h1 style='text-align: center; color: RebeccaPurple; font-family: 'Poppins', sans-serif;'>in sync<span style='color: #ff31fa'>.</span></h1>", unsafe_allow_html=True)
-            st.markdown("<h3 style='text-align: center; color: #ff008c;'>Your personal AI<br/>synchronisation assistant.</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='text-align: center; color: #ff008c;'><u>y</u>our personal AI<br/>synchronisation assistant.</h3>", unsafe_allow_html=True)
     with col3:
         st_lottie(lottie_dancing, key="dance_right")
 
@@ -158,7 +158,7 @@ def main():
 
             fig0 = create_fig('frames', 'Smoothed_error', 'Performance Overview',
                                 'frames', {'frames': 'Frame Number', 
-                                           'Smoothed_error': 'Error / 10 frames'})
+                                           'Smoothed_error': 'Sync Error (degrees)'})
             fig0.update_layout(hovermode="x unified")
 
             # fig1 = create_fig('frames', 'good_scores', 'Model Inaccurracy',
@@ -176,7 +176,7 @@ def main():
 
             fig2 = create_fig('frames', 'Smoothed_link_error', 'Link with Highest Error',
                                 'Link_names', {'frames': 'Frame Number', 
-                                               'Smoothed_link_error': 'Error of Worst Link'})
+                                               'Smoothed_link_error': 'Worst Link Error (degrees)'})
             fig2.update_layout(hovermode="x unified")
 
             #Load processed video
