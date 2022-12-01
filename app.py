@@ -168,7 +168,7 @@ def main():
             df['frames'] = df.index
             #separate low confidence frames
             df['good_scores'] = np.where(df['bools'] == True, df['Error'], np.nan)
-            df['bad_scores'] = np.where(df['bools'] == False, np.nan, df['Error'])
+            df['bad_scores'] = np.where(df['bools'] == False, df['Error'], np.nan)
             #smoother graphs
             df['Smoothed_error'] = df['good_scores'].rolling(window=5).mean()
             df['Smoothed_error_bad'] = df['bad_scores'].rolling(window=5).mean()
