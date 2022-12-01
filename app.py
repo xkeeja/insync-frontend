@@ -223,14 +223,14 @@ def main():
                 st.plotly_chart(fig2, use_container_width=True)
 
             with st.expander("**Score Card:**"):
-                performance = 1 - (df['good_scores'].isna().sum() / df.shape[0]) * 100
+                performance = (1 - df['good_scores'].isna().sum() / df.shape[0]) * 100
                 st.write("Model confidence: ", performance, "%")
                 #overall score sensitive to outliers
                 scores = df['good_scores'].dropna()
                 # scaler = MinMaxScaler()
                 # df['scaled'] = scaler.fit_transform(np.array(scores).reshape(-1,1))
                 # overall_score = (1 - df['scaled'].mean()) * 100
-                st.write("Overall score: ", scores.mean() * 100)
+                st.write("Overall score: ", scores.mean() / 100)
                 # st.write("Scaled score: ", overall_score, "%")
                 #split dataframe into equal parts
                 scores_sorted = scores.sort_values()
