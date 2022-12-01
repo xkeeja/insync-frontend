@@ -194,10 +194,6 @@ def main():
             
             st.plotly_chart(fig0, use_container_width=True)
 
-            # with st.expander("**Detailed Analysis**"):
-            #     st.plotly_chart(fig1, use_container_width=True)
-            st.plotly_chart(fig2, use_container_width=True)
-
             with st.expander('**View freeze frames:**'):
                 frame = st.slider("View frames starting from choice", 0, int(stats['frame_count']), 0, label_visibility='hidden')
                 a, b = st.columns(2)
@@ -210,6 +206,10 @@ def main():
                     st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+2}.jpg")
                 with d:
                     st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+3}.jpg")
+
+            # with st.expander("**Detailed Analysis**"):
+            #     st.plotly_chart(fig1, use_container_width=True)
+            st.plotly_chart(fig2, use_container_width=True)
 
             with st.expander("**Model info:**"):
                 st.dataframe(df)
