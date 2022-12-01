@@ -182,26 +182,26 @@ def main():
                 fig.update_traces(line_color="#ff008c")
                 return fig
 
-            fig1 = create_fig('frames', 'Smoothed_error', 'Synchronisation Analysis',
+            fig1 = create_fig('frames', 'good_scores', 'Synchronisation Analysis',
                                 'frames', {'frames': 'Frame Number', 
                                            'Smoothed_error': 'Mean Absolute Error'})
             fig1.add_trace(
                 go.Scatter(
                     x=df['frames'],
-                    y=df['Smoothed_error_bad'],
+                    y=df['bad_scores'],
                     mode="lines",
                     line=go.scatter.Line(color="red"),
                     showlegend=False)
             )
 
-            fig1.add_trace(
-                go.Scatter(
-                    x=df['frames'],
-                    y=df['Smoothed_error'],
-                    mode="lines",
-                    line=go.scatter.Line(color="blue"),
-                    showlegend=False)
-            )
+            # fig1.add_trace(
+            #     go.Scatter(
+            #         x=df['frames'],
+            #         y=df['Smoothed_error'],
+            #         mode="lines",
+            #         line=go.scatter.Line(color="blue"),
+            #         showlegend=False)
+            # )
 
             fig2 = create_fig('frames', 'Smoothed_link_error', 'Worst Actions',
                                 'Link_names', {'frames': 'Frame Number', 
