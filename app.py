@@ -74,7 +74,7 @@ def main():
         st_lottie(lottie_dancing, key="dance_left")
     with col2:
         with col2:
-            st.markdown("<h1 style='text-align: center; color: RebeccaPurple; font-family: 'Poppins', sans-serif;'>in sync.</h1>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center; color: RebeccaPurple; font-family: 'Poppins', sans-serif;'>in sync<span style='color: #ff31fa'>.</span></h1>", unsafe_allow_html=True)
             st.markdown("<h3 style='text-align: center; color: #ff008c;'>Your personal AI<br/>synchronisation assistant.</h3>", unsafe_allow_html=True)
     with col3:
         st_lottie(lottie_dancing, key="dance_right")
@@ -105,10 +105,11 @@ def main():
         with st.sidebar:
             dancers = st.number_input("Number of dancers (1-6):", value=2, min_value=1, max_value=6)
             stats['dancers'] = dancers
-            conf = st.number_input("Minimum confidence threshold (0-100%):", value=10, min_value=0, max_value=100)
-            stats['conf_threshold'] = conf / 100
-            face = st.selectbox("Ignore faces:", ("True", "False"))
-            stats['face_ignored'] = face
+            with st.expander("Advanced settings ↓"):
+                conf = st.number_input("Minimum confidence threshold (0-100%):", value=0, min_value=0, max_value=100)
+                stats['conf_threshold'] = conf / 100
+                face = st.selectbox("Ignore faces:", ("True", "False"))
+                stats['face_ignored'] = face
 
 
         if st.sidebar.checkbox("Click to start (RESET this checkbox to upload new video)"):
@@ -152,7 +153,7 @@ def main():
                                 hover_name=hover_name, labels=labels)
                 fig.update_xaxes(showgrid=False)
                 fig.update_yaxes(showgrid=False)
-                fig.update_traces(line_color="blue")
+                fig.update_traces(line_color="#ff008c")
                 return fig
 
             fig0 = create_fig('frames', 'Smoothed_error', 'Performance Overview',
@@ -160,22 +161,22 @@ def main():
                                            'Smoothed_error': 'Error / 10 frames'})
             fig0.update_layout(hovermode="x unified")
 
-            fig1 = create_fig('frames', 'good_scores', 'Model Inaccurracy',
-                                'frames', {'frames': 'Frame Number', 
-                                           'Smoothed_error': 'Mean Absolute Error'})
-            fig1.update_traces(line_color="grey")
-            fig1.add_trace(
-                go.Scatter(
-                    x=df['frames'],
-                    y=df['bad_scores'],
-                    mode="lines",
-                    line=go.scatter.Line(color="red"),
-                    name='Bad')
-            )
+            # fig1 = create_fig('frames', 'good_scores', 'Model Inaccurracy',
+            #                     'frames', {'frames': 'Frame Number', 
+            #                                'Smoothed_error': 'Mean Absolute Error'})
+            # fig1.update_traces(line_color="grey")
+            # fig1.add_trace(
+            #     go.Scatter(
+            #         x=df['frames'],
+            #         y=df['bad_scores'],
+            #         mode="lines",
+            #         line=go.scatter.Line(color="red"),
+            #         name='Bad')
+            # )
 
-            fig2 = create_fig('frames', 'Smoothed_link_error', 'Worst Actions',
+            fig2 = create_fig('frames', 'Smoothed_link_error', 'Link with Highest Error',
                                 'Link_names', {'frames': 'Frame Number', 
-                                               'Smoothed_link_error': 'Max Error Body Part'})
+                                               'Smoothed_link_error': 'Error of Worst Link'})
             fig2.update_layout(hovermode="x unified")
 
             #Load processed video
@@ -185,7 +186,7 @@ def main():
                     st.color_picker('Perfect', '#41961A'),
                     st.color_picker('Good Effort', '#A6D96A'),
                     st.color_picker('Average', '#FDAE61'),
-                    st.color_picker('You Suck', '#D7191C')
+                    st.color_picker('De-synced', '#D7191C')
                 ]
             with b:
                 video_url = response['output_url']
@@ -193,9 +194,9 @@ def main():
             
             st.plotly_chart(fig0, use_container_width=True)
 
-            with st.expander("**Detailed Analysis**"):
-                st.plotly_chart(fig1, use_container_width=True)
-                st.plotly_chart(fig2, use_container_width=True)
+            # with st.expander("**Detailed Analysis**"):
+            #     st.plotly_chart(fig1, use_container_width=True)
+            st.plotly_chart(fig2, use_container_width=True)
 
             with st.expander('**View freeze frames:**'):
                 frame = st.slider("View frames starting from choice", 0, int(stats['frame_count']), 0, label_visibility='hidden')
