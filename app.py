@@ -167,14 +167,12 @@ def main():
             df = pd.DataFrame(d)
             df['frames'] = df.index
 
-            #none to nan
-            df['Error'] = np.where(df['Error'] == None, np.nan, df['Error'])
             #separate low confidence frames
             df['good_scores'] = np.where(df['bools'] == False, df['Error'], np.nan)
             df['bad_scores'] = np.where(df['bools'] == True, df['Error'], np.nan)
             #smoother graphs
-            df['Smoothed_error'] = df['good_scores'].rolling(window=5).mean()
-            df['Smoothed_error_bad'] = df['bad_scores'].rolling(window=5).mean()
+            df['Smoothed_good'] = df['good_scores'].rolling(window=5).mean()
+            df['Smoothed_bad'] = df['bad_scores'].rolling(window=5).mean()
             df['Smoothed_link_error'] = df['Link_scores'].rolling(window=9).mean()
 
             def create_fig(x, y, title, hover_name, labels):
@@ -185,7 +183,7 @@ def main():
                 fig.update_traces(line_color="blue")
                 return fig
 
-            fig1 = create_fig('frames', 'good_scores', 'Synchronisation Analysis',
+            fig1 = create_fig('frames', 'Smoothed_good', 'Synchronisation Analysis',
                                 'frames', {'frames': 'Frame Number', 
                                            'Smoothed_error': 'Mean Absolute Error'})
             fig1.add_trace(
@@ -228,17 +226,18 @@ def main():
 
             with st.expander("**Score Card:**"):
                 #overall score sensitive to outliers
+                scores = df['good_scores'].dropna()
                 scaler = MinMaxScaler()
-                df['scaled'] = scaler.fit_transform(np.array(df['Error']).reshape(-1,1))
-                overall_score = (1 - np.nanmean(df['scaled'])) * 100
-                st.write("Overall score: ", (1 - np.nanmean(df['Error'])) * 100, "%")
+                df['scaled'] = scaler.fit_transform(np.array(scores).reshape(-1,1))
+                overall_score = (1 - df['scaled'].mean()) * 100
+                st.write("Overall score: ", (1 - scores.mean() * 100, "%")
                 st.write("Scaled score: ", overall_score, "%")
                 #split dataframe into equal parts
-                df_sorted = df.dropna().sort_values(by=['Error'])
-                split = np.array_split(df_sorted, 4)
+                scores_sorted = scores.sort_values()
+                split = np.array_split(scores_sorted, 4)
                 st.write("Score for each quartile:")
-                for i, df_sorted in enumerate(split):
-                    st.write(i+1, ": ", df_sorted['Error'].mean())
+                for i, score in enumerate(split):
+                    st.write(i+1, ": ", score.mean())
 
             with st.expander('**View freeze frames:**'):
                 frame = st.slider("View frames starting from choice", 0, int(stats['frame_count']), 0, label_visibility='hidden')
