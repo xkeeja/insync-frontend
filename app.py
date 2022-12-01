@@ -10,7 +10,6 @@ from htbuilder import div, big, h2, styles
 from htbuilder.units import rem
 from streamlit_lottie import st_lottie
 from streamlit_lottie import st_lottie_spinner
-from sklearn.preprocessing import MinMaxScaler
 from streamlit_extras.add_vertical_space import add_vertical_space
 
 st.set_page_config(page_title="in sync.")
@@ -103,36 +102,10 @@ def main():
         with c:
             display_dial("DIMENSION", f"{stats['dim']}", "#ff008c")
 
-
-        # a, b, c = st.columns(3)
-        # with a:
-        #     dancers = st.number_input("Number of dancers (1-6):", value=2, min_value=1, max_value=6)
-        #     stats['dancers'] = dancers
-        # with b:
-        #     conf = st.number_input("Model confidence interval (0-100):", value=20, min_value=0, max_value=100)
-        #     stats['conf_threshold'] = conf
-        # with c:
-        #     face = st.selectbox("Ignore faces:", ("True", "False"))
-        #     stats['face_ignored'] = face
-
-        # st.markdown(
-        #             """
-        #             <style>
-        #             [data-testid="stSidebar"][aria-expanded="true"] > div:first-child{
-        #                 width : 350px
-        #             }
-        #             [data-testid="stSidebar"][aria-expanded="false"] > div:first-child{
-        #                 width : 350px
-        #                 margin-left: -350px
-        #             }
-        #             </style>
-        #             """,
-        #             unsafe_allow_html=True
-        # )
         with st.sidebar:
             dancers = st.number_input("Number of dancers (1-6):", value=2, min_value=1, max_value=6)
             stats['dancers'] = dancers
-            conf = st.number_input("Confidence interval (0-100%):", value=20, min_value=0, max_value=100)
+            conf = st.number_input("Minimum confidence threshold (0-100%):", value=10, min_value=0, max_value=100)
             stats['conf_threshold'] = conf / 100
             face = st.selectbox("Ignore faces:", ("True", "False"))
             stats['face_ignored'] = face
@@ -172,7 +145,7 @@ def main():
             df['bad_scores'] = np.where(df['bools'] == True, df['Error'], np.nan)
             #smoother graphs
             df['Smoothed_error'] = df['Error'].rolling(window=10).mean()
-            df['Smoothed_link_error'] = df['Link_scores'].rolling(window=9).mean()
+            df['Smoothed_link_error'] = df['Link_scores'].rolling(window=10).mean()
 
             def create_fig(x, y, title, hover_name, labels):
                 fig = px.line(df, x=x, y=y, title=title,
@@ -196,8 +169,9 @@ def main():
                     y=df['bad_scores'],
                     mode="lines",
                     line=go.scatter.Line(color="red"),
-                    showlegend=False)
+                    name='Good')
             )
+            fig1.update_layout(hovermode="x unified")
 
             fig2 = create_fig('frames', 'Smoothed_link_error', 'Worst Actions',
                                 'Link_names', {'frames': 'Frame Number', 
@@ -222,23 +196,6 @@ def main():
                 st.plotly_chart(fig1, use_container_width=True)
                 st.plotly_chart(fig2, use_container_width=True)
 
-            with st.expander("**Score Card:**"):
-                performance = (1 - df['good_scores'].isna().sum() / df.shape[0]) * 100
-                st.write("Model confidence: ", performance, "%")
-                #overall score sensitive to outliers
-                scores = df['good_scores'].dropna()
-                # scaler = MinMaxScaler()
-                # df['scaled'] = scaler.fit_transform(np.array(scores).reshape(-1,1))
-                # overall_score = (1 - df['scaled'].mean()) * 100
-                st.write("Overall score: TBA")
-                # st.write("Scaled score: ", overall_score, "%")
-                #split dataframe into equal parts
-                scores_sorted = scores.sort_values()
-                split = np.array_split(scores_sorted, 4)
-                st.write("Score for each quartile:")
-                for i, score in enumerate(split):
-                    st.write(i+1, ": ", score.mean())
-
             with st.expander('**View freeze frames:**'):
                 frame = st.slider("View frames starting from choice", 0, int(stats['frame_count']), 0, label_visibility='hidden')
                 a, b = st.columns(2)
@@ -254,15 +211,7 @@ def main():
 
             with st.expander("**Model info:**"):
                 st.dataframe(df)
-                # fig3 = go.Figure(data=[go.Table(
-                #     header=dict(values=list(df.columns),
-                #                 fill_color='paleturquoise',
-                #                 align='left'),
-                #     cells=dict(values=[df.frames, df.Time, df.Error, df.Link_names, d.Link_scores],
-                #                fill_color='lavender',
-                #                align='left'))
-                # ])
-                # st.plotly_chart(fig3)
+
 
 if __name__ == '__main__':
     main()
