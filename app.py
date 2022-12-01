@@ -193,7 +193,7 @@ def main():
                     x=df['frames'],
                     y=df['bad_scores'],
                     mode="lines",
-                    line=go.scatter.Line(color="red"),
+                    line=go.scatter.Line(color="grey"),
                     showlegend=False)
             )
 
