@@ -194,6 +194,15 @@ def main():
                     showlegend=False)
             )
 
+            fig1.add_trace(
+                go.Scatter(
+                    x=df['frames'],
+                    y=df['Smoothed_error'],
+                    mode="lines",
+                    line=go.scatter.Line(color="blue"),
+                    showlegend=False)
+            )
+
             fig2 = create_fig('frames', 'Smoothed_link_error', 'Worst Actions',
                                 'Link_names', {'frames': 'Frame Number', 
                                                'Smoothed_link_error': 'Max Error Body Part'})
