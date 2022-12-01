@@ -171,8 +171,7 @@ def main():
             df['good_scores'] = np.where(df['bools'] == False, df['Error'], np.nan)
             df['bad_scores'] = np.where(df['bools'] == True, df['Error'], np.nan)
             #smoother graphs
-            df['Smoothed_good'] = df['good_scores'].rolling(window=5).mean()
-            df['Smoothed_bad'] = df['bad_scores'].rolling(window=5).mean()
+            df['Smoothed_error'] = df['Error'].rolling(window=10).mean()
             df['Smoothed_link_error'] = df['Link_scores'].rolling(window=9).mean()
 
             def create_fig(x, y, title, hover_name, labels):
@@ -183,7 +182,11 @@ def main():
                 fig.update_traces(line_color="blue")
                 return fig
 
-            fig1 = create_fig('frames', 'Smoothed_good', 'Synchronisation Analysis',
+            fig0 = create_fig('frames', 'Smoothed_error', 'Performance Overview',
+                                'frames', {'frames': 'Frame Number', 
+                                           'Smoothed_error': 'Error / 10 frames'})
+
+            fig1 = create_fig('frames', 'good_scores', 'Model Inaccurracy',
                                 'frames', {'frames': 'Frame Number', 
                                            'Smoothed_error': 'Mean Absolute Error'})
             fig1.add_trace(
@@ -194,15 +197,6 @@ def main():
                     line=go.scatter.Line(color="grey"),
                     showlegend=False)
             )
-
-            # fig1.add_trace(
-            #     go.Scatter(
-            #         x=df['frames'],
-            #         y=df['Smoothed_error'],
-            #         mode="lines",
-            #         line=go.scatter.Line(color="blue"),
-            #         showlegend=False)
-            # )
 
             fig2 = create_fig('frames', 'Smoothed_link_error', 'Worst Actions',
                                 'Link_names', {'frames': 'Frame Number', 
@@ -221,10 +215,15 @@ def main():
                 video_url = response['output_url']
                 st.video(video_url)
             
-            st.plotly_chart(fig1, use_container_width=True)
-            st.plotly_chart(fig2, use_container_width=True)
+            st.plotly_chart(fig0, use_container_width=True)
+
+            with st.expander("## Detailed Analysis"):
+                st.plotly_chart(fig1, use_container_width=True)
+                st.plotly_chart(fig2, use_container_width=True)
 
             with st.expander("**Score Card:**"):
+                performance = 1 - df['good_scores'].isna().sum() / df.shape[0] * 100
+                st.write("Model performance: ", performance, "% accuracy")
                 #overall score sensitive to outliers
                 scores = df['good_scores'].dropna()
                 scaler = MinMaxScaler()
