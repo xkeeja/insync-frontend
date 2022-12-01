@@ -158,6 +158,7 @@ def main():
             fig0 = create_fig('frames', 'Smoothed_error', 'Performance Overview',
                                 'frames', {'frames': 'Frame Number', 
                                            'Smoothed_error': 'Error / 10 frames'})
+            fig0.update_layout(hovermode="x unified")
 
             fig1 = create_fig('frames', 'good_scores', 'Model Inaccurracy',
                                 'frames', {'frames': 'Frame Number', 
@@ -169,13 +170,13 @@ def main():
                     y=df['bad_scores'],
                     mode="lines",
                     line=go.scatter.Line(color="red"),
-                    name='Good')
+                    name='Bad')
             )
-            fig1.update_layout(hovermode="x unified")
 
             fig2 = create_fig('frames', 'Smoothed_link_error', 'Worst Actions',
                                 'Link_names', {'frames': 'Frame Number', 
                                                'Smoothed_link_error': 'Max Error Body Part'})
+            fig2.update_layout(hovermode="x unified")
 
             #Load processed video
             a, b = st.columns([1,4])
