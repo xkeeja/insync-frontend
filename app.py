@@ -166,6 +166,7 @@ def main():
             }
             df = pd.DataFrame(d)
             df['frames'] = df.index
+
             #none to nan
             df['Error'] = np.where(df['Error'] == None, np.nan, df['Error'])
             #separate low confidence frames
@@ -229,8 +230,8 @@ def main():
                 #overall score sensitive to outliers
                 scaler = MinMaxScaler()
                 df['scaled'] = scaler.fit_transform(np.array(df['Error']).reshape(-1,1))
-                overall_score = (1 - df['scaled'].nanmean()) * 100
-                st.write("Overall score: ", df['Error'].nanmean(), "%")
+                overall_score = (1 - np.array(df['scaled']).nanmean()) * 100
+                st.write("Overall score: ", (1 - df['Error'].nanmean()) * 100, "%")
                 st.write("Scaled score: ", overall_score, "%")
                 #split dataframe into equal parts
                 df_sorted = df.dropna().sort_values(by=['Error'])
