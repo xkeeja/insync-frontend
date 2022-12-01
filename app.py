@@ -53,7 +53,7 @@ def display_dial(title, value, color):
 @st.experimental_memo
 def processing(d):
     # url = "http://127.0.0.1:8000/vid_process"
-    url = "https://syncv9-eagwezifvq-an.a.run.app/vid_process"
+    url = "https://syncv10-eagwezifvq-an.a.run.app/vid_process"
     params = {k:d[k] for k in d if k!='dim'}
     response = requests.get(url, params=params).json()
     return response
@@ -61,7 +61,7 @@ def processing(d):
 
 @st.experimental_memo
 def fetch_stats(uploaded_video):
-    url = "https://syncv9-eagwezifvq-an.a.run.app/vid_stats"
+    url = "https://syncv10-eagwezifvq-an.a.run.app/vid_stats"
     # url = "http://127.0.0.1:8000/vid_stats"
     files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
     stats = requests.post(url, files=files).json()
@@ -161,11 +161,17 @@ def main():
                 'Time': response['timestamps'],
                 'Error': response['scores'],
                 'Link_scores': response['link_scores'],
-                'Link_names': response['link_names']
+                'Link_names': response['link_names'],
+                'bools': response['scores_bool']
             }
             df = pd.DataFrame(d)
             df['frames'] = df.index
-            df['Smoothed_error'] = df['Error'].rolling(window=9).mean()
+            #separate low confidence frames
+            df['good_scores'] = np.where(df['bools'] == True, df['Error'], np.nan)
+            df['bad_scores'] = np.where(df['bools'] == False, np.nan, df['Error'])
+            #smoother graphs
+            df['Smoothed_error'] = df['good_scores'].rolling(window=5).mean()
+            df['Smoothed_error_bad'] = df['bad_scores'].rolling(window=5).mean()
             df['Smoothed_link_error'] = df['Link_scores'].rolling(window=9).mean()
 
             def create_fig(x, y, title, hover_name, labels):
@@ -174,12 +180,12 @@ def main():
                 fig.update_xaxes(showgrid=False)
                 fig.update_yaxes(showgrid=False)
                 fig.update_traces(line_color="#ff008c")
-                # fig = go.FigureWidget(fig.data, fig.layout)
                 return fig
 
             fig1 = create_fig('frames', 'Smoothed_error', 'Synchronisation Analysis',
                                 'frames', {'frames': 'Frame Number', 
                                            'Smoothed_error': 'Mean Absolute Error'})
+            fig1.add_trace(go.Line(x='frames', y='Smoothed_error_bad', color='red'))
 
             fig2 = create_fig('frames', 'Smoothed_link_error', 'Worst Actions',
                                 'Link_names', {'frames': 'Frame Number', 
