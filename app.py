@@ -75,8 +75,8 @@ def main():
         st_lottie(lottie_dancing, key="dance_left")
     with col2:
         with col2:
-            st.markdown("<h1 style='text-align: center; color: RebeccaPurple; font-family: Poppins;'>in sync.</h1>", unsafe_allow_html=True)
-            st.markdown("<h3 style='text-align: center; color: #ff008c; font-family: Quattrocento Sans;'>Your personal AI<br/>synchronisation assistant.</h3>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center; color: RebeccaPurple; font-family: 'Poppins', sans-serif;>in sync.</h1>", unsafe_allow_html=True)
+            st.markdown("<h3 style='text-align: center; color: #ff008c;>Your personal AI<br/>synchronisation assistant.</h3>", unsafe_allow_html=True)
     with col3:
         st_lottie(lottie_dancing, key="dance_right")
 
