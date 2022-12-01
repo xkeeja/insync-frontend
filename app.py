@@ -230,7 +230,7 @@ def main():
                 # scaler = MinMaxScaler()
                 # df['scaled'] = scaler.fit_transform(np.array(scores).reshape(-1,1))
                 # overall_score = (1 - df['scaled'].mean()) * 100
-                st.write("Overall score: ", scores.mean() / 100)
+                st.write("Overall score: TBA")
                 # st.write("Scaled score: ", overall_score, "%")
                 #split dataframe into equal parts
                 scores_sorted = scores.sort_values()
