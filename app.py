@@ -189,12 +189,13 @@ def main():
             fig1 = create_fig('frames', 'good_scores', 'Model Inaccurracy',
                                 'frames', {'frames': 'Frame Number', 
                                            'Smoothed_error': 'Mean Absolute Error'})
+            fig1.update_traces(line_color="grey")
             fig1.add_trace(
                 go.Scatter(
                     x=df['frames'],
                     y=df['bad_scores'],
                     mode="lines",
-                    line=go.scatter.Line(color="grey"),
+                    line=go.scatter.Line(color="red"),
                     showlegend=False)
             )
 
@@ -217,7 +218,7 @@ def main():
             
             st.plotly_chart(fig0, use_container_width=True)
 
-            with st.expander("## Detailed Analysis"):
+            with st.expander("**Detailed Analysis**"):
                 st.plotly_chart(fig1, use_container_width=True)
                 st.plotly_chart(fig2, use_container_width=True)
 
