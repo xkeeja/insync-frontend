@@ -198,7 +198,8 @@ def main():
             st.plotly_chart(fig0, use_container_width=True)
 
             with st.expander('**View freeze frames:**'):
-                frame = st.slider("View frames starting from choice", 0, int(stats['frame_count']), 0, label_visibility='hidden')
+                # frame = st.slider("View frames starting from choice", 0, int(stats['frame_count']), 0, label_visibility='hidden')
+                frame = st.number_input("View frames starting from choice", value=0, min_value=0, max_value=int(df.shape[0]), label_visibility='hidden')
                 def frame_url(f):
                     return f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{f}.jpg"
                 a, b = st.columns(2)
