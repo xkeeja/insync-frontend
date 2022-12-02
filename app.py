@@ -74,7 +74,6 @@ def main():
         st_lottie(lottie_dancing, key="dance_left")
     with col2:
         with col2:
-            # st.markdown("<h1 style='text-align: center; color: RebeccaPurple; font-family: 'Poppins', sans-serif;'>in sync<span style='color: #ff31fa'>.</span></h1>", unsafe_allow_html=True)
             st.image('logo_grey.png')
             st.markdown("<h3 style='text-align: center; color: #ff008c;'>Your personal AI<br/>synchronisation assistant.</h3>", unsafe_allow_html=True)
     with col3:
@@ -198,7 +197,6 @@ def main():
             st.plotly_chart(fig0, use_container_width=True)
 
             with st.expander('**View freeze frames:**'):
-                # frame = st.slider("View frames starting from choice", 0, int(stats['frame_count']), 0, label_visibility='hidden')
                 frame = st.number_input("View frames starting from choice", value=0, min_value=0, max_value=int(df.shape[0]), label_visibility='hidden')
                 def frame_url(f):
                     return f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{f}.jpg"
@@ -213,8 +211,6 @@ def main():
                 with d:
                     st.image(frame_url(frame+3))
 
-            # with st.expander("**Detailed Analysis**"):
-            #     st.plotly_chart(fig1, use_container_width=True)
             st.plotly_chart(fig2, use_container_width=True)
 
             with st.expander("**Model info:**"):
