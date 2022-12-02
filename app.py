@@ -75,7 +75,7 @@ def main():
     with col2:
         with col2:
             # st.markdown("<h1 style='text-align: center; color: RebeccaPurple; font-family: 'Poppins', sans-serif;'>in sync<span style='color: #ff31fa'>.</span></h1>", unsafe_allow_html=True)
-            st.image('logo.png')
+            st.image('logo_grey.png')
             st.markdown("<h3 style='text-align: center; color: #ff008c;'>Your personal AI<br/>synchronisation assistant.</h3>", unsafe_allow_html=True)
     with col3:
         st_lottie(lottie_dancing, key="dance_right")
@@ -199,16 +199,18 @@ def main():
 
             with st.expander('**View freeze frames:**'):
                 frame = st.slider("View frames starting from choice", 0, int(stats['frame_count']), 0, label_visibility='hidden')
+                def frame_url(f):
+                    return f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{f}.jpg"
                 a, b = st.columns(2)
                 with a:
-                    st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame}.jpg")
+                    st.image(frame_url(frame))
                 with b:
-                    st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+1}.jpg")
+                    st.image(frame_url(frame+1))
                 c, d = st.columns(2)
                 with c:
-                    st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+2}.jpg")
+                    st.image(frame_url(frame+2))
                 with d:
-                    st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{frame+3}.jpg")
+                    st.image(frame_url(frame+3))
 
             # with st.expander("**Detailed Analysis**"):
             #     st.plotly_chart(fig1, use_container_width=True)
