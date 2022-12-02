@@ -52,7 +52,7 @@ def display_dial(title, value, color):
 @st.experimental_memo
 def processing(d):
     # url = "http://127.0.0.1:8000/vid_process"
-    url = "https://syncv11-eagwezifvq-an.a.run.app/vid_process"
+    url = "https://syncv12-eagwezifvq-an.a.run.app/vid_process"
     params = {k:d[k] for k in d if k!='dim'}
     response = requests.get(url, params=params).json()
     return response
@@ -60,7 +60,7 @@ def processing(d):
 
 @st.experimental_memo
 def fetch_stats(uploaded_video):
-    url = "https://syncv11-eagwezifvq-an.a.run.app/vid_stats"
+    url = "https://syncv12-eagwezifvq-an.a.run.app/vid_stats"
     # url = "http://127.0.0.1:8000/vid_stats"
     files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
     stats = requests.post(url, files=files).json()
@@ -74,7 +74,8 @@ def main():
         st_lottie(lottie_dancing, key="dance_left")
     with col2:
         with col2:
-            st.markdown("<h1 style='text-align: center; color: RebeccaPurple; font-family: 'Poppins', sans-serif;'>in sync<span style='color: #ff31fa'>.</span></h1>", unsafe_allow_html=True)
+            # st.markdown("<h1 style='text-align: center; color: RebeccaPurple; font-family: 'Poppins', sans-serif;'>in sync<span style='color: #ff31fa'>.</span></h1>", unsafe_allow_html=True)
+            st.image('n.png')
             st.markdown("<h3 style='text-align: center; color: #ff008c;'>Your personal AI<br/>synchronisation assistant.</h3>", unsafe_allow_html=True)
     with col3:
         st_lottie(lottie_dancing, key="dance_right")
