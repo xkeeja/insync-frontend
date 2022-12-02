@@ -111,7 +111,7 @@ def main():
                 stats['conf_threshold'] = conf / 100
                 face = st.selectbox("Ignore faces:", ("True", "False"))
                 stats['face_ignored'] = face
-                conf_d = st.selectbox("Confidence display:", ("True","False"))
+                conf_d = st.selectbox("Confidence display:", ("True","False"), index=1)
                 stats['confidence_display'] = conf_d
 
 
