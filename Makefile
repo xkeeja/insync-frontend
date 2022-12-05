@@ -1,2 +1,2 @@
 run_streamlit:
-	streamlit run app_revised.py
+	streamlit run app.py
