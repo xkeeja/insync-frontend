@@ -1,11 +1,8 @@
 import streamlit as st
 import requests
-import math
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
 import plotly.express as px
-import time
 from htbuilder import div, big, h2, styles
 from htbuilder.units import rem
 from streamlit_lottie import st_lottie
@@ -51,8 +48,8 @@ def display_dial(title, value, color):
 
 @st.experimental_memo
 def processing(d):
-    # url = "http://127.0.0.1:8000/vid_process"
     url = "https://syncv12-eagwezifvq-an.a.run.app/vid_process"
+    # url = "http://127.0.0.1:8000/vid_process"
     params = {k:d[k] for k in d if k!='dim'}
     response = requests.get(url, params=params).json()
     return response
