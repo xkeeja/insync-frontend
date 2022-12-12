@@ -4,6 +4,7 @@ _Your personal AI synchronization assistant._
 
 Is there an objective way to **mathematically quantify** synchronization in dance?
 
+Using trigonometry-based error tracking to objectively determine areas of greatest performance improvement through frame-by-frame video analysis. 
 
 https://user-images.githubusercontent.com/113004083/206090266-18d06a24-b054-4d29-b75a-efcd41fc5f8d.mp4
 
